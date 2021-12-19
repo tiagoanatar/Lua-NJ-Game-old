@@ -47,7 +47,7 @@ local function index_comp_reset()
   
     -- contador de quanto tempo fica denconfiado
     if state.enemy.alert_d == "on" then state.enemy.alert_d_time = state.enemy.alert_d_time + 1 end
-    
+     
     -- end alert player
     if state.enemy.alert_p_time > 4 then
       comp_reset()
@@ -86,40 +86,24 @@ local function muda_dire(random)
 end
 
 -- movement
-function move_max_zero() enemy_ref.m_max = 0 end -- used also on: move
+local function move_max_zero() enemy_ref.m_max = 0 end
 
 local function enem_move()
 
   -- if close to hero stop
   if ma_he(state.player,enemy_ref) == 45 and enemy_ref.comp == "alert_player" then 
     move_max_zero()
+    -- attack function
+    state.combat.enemy_active = "on"
+    combate_update()
   end
 
-  -- if close do body stop
+  -- if close to body stop
   if ma_he(state.enemy.vision.dead,enemy_ref) == 45 and enemy_ref.comp ~= "alert_desconf" and enemy_ref.comp ~= "alert_player" then 
     move_max_zero()
     -- muda direcao 
     muda_dire(true)
   end
-
-  --[[ first time alert stop
-  --if enemy_ref.comp == "alert_player" and state.enemy.alert_p_first == "on" and state.move.ref_index == 0 then 
-  --  move_max_zero()
-  --  state.enemy.alert_p_first = "off"
-  --end 
-
-  -- first time body alert stop
-  if enemy_ref.comp == "alert_body" and state.enemy.alert_p_first == "on" and state.move.ref_index == 0 then 
-    move_max_zero()
-    state.enemy.alert_p_first = "off"
-  end 
-
-  -- first time item alert stop
-  if enemy_ref.comp == "alert_item" and state.enemy.alert_p_first == "on" and state.move.ref_index == 0 then 
-    move_max_zero()
-    state.enemy.alert_p_first = "off"
-  end --]]
-
   -- move
   move_main(enemy_ref)
 
@@ -214,7 +198,7 @@ end
 -- 0.1 - setup
 local function setup_inicial()
 
-  enemy_ref.m_max = 10
+  enemy_ref.m_max = enemy_ref.m_max_base
   local_var = "off" -- turn off setup
 
 end
@@ -317,7 +301,7 @@ local function comp_dead()
 end
 
 -- ///////////////////////////////////////////////////////////////
---// ALERT
+--// ALERTA
 --///////////////////////////////////////////////////////////////
 
 -- 1 - alert - descon
@@ -415,7 +399,7 @@ function enemy_comp()
       enemy_ref.change_comp = "off" -- stop behavior change
     end
   end 
-
+    
   -- comp activation functions
   if enemy_ref.comp == "stop" then
     enemy_ref.main_anim = 1
@@ -447,12 +431,6 @@ function enemy_comp()
   if enemy_ref.comp == "confuse" then 
     comp_stop()
     enemy_ref.alert_anim = 6
-  end
-  
-  -- combat trigger
-  if ma_he(state.player,enemy_ref) == 45 and enemy_ref.comp == "alert_player" then 
-    state.combat.enemy_active = "on"
-    combate_update()
   end
 
 end
