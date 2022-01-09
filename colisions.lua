@@ -42,8 +42,20 @@ function mouse_action_box_update(box)
       box.x = state.range.open[i].x
       box.y = state.range.open[i].y
       found = true
+      
+      --
+      if state.turn == "move" then
+        state.range.fim.x = box.x
+        state.range.fim.y = box.y
+        state.player.range_open_index = 0
+        state.range.path_end = "off" -- GLOBAL
+        range_path_final(state.player)
+      end
+      --
+      
       if love.mouse.isDown(1) and state.turn == "move" then
         state.player.range_open_index = i
+        state.player.trigger_auto_move = true
       end
     end
   end
@@ -51,6 +63,20 @@ function mouse_action_box_update(box)
   if found == false then
     box.x = -900
     box.y = -900
+  end
+    
+end
+
+function is_open_block()
+
+  for i,v in ipairs(state.range.open) do
+    if wm.x >= state.range.open[i].x
+    and wm.y >= state.range.open[i].y
+    and wm.x < state.range.open[i].x + m_size_tile
+    and wm.y < state.range.open[i].y + m_size_tile 
+    and state.range.open[i].check == "close" then
+      return true
+    end
   end
     
 end
@@ -93,7 +119,7 @@ function colisao_main(n,pos_val_x,pos_val_y)
 
   -- bloqueia mov - move
   if state.turn == "move" then
-    local position_check = false -- is position does not exist, dont move
+    local position_check = false -- if position does not exist, dont move
     for i,v in ipairs(grid_global) do 
       if n.x + pos_val_x == grid_global[i].x and n.y + pos_val_y == grid_global[i].y then
         position_check = true

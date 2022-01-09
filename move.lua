@@ -1,14 +1,16 @@
 -- enemy ref holder
 local enemy_ref = state.enemy.list
 
--- zero movement
-local function move_max_zero() enemy_ref.m_max = 0 end
+-- movement
+local function move_max_zero(i) 
+  enemy_ref[i].m_max = 0 
+end
 
 -- ///////////////////////////////////////////////////////////////
 --// MOVE PATH 
 --///////////////////////////////////////////////////////////////
 
-local function move_path(ttype)
+function move_path(ttype)
   
   local x = ttype.x
   local y = ttype.y
@@ -32,7 +34,7 @@ local function move_path(ttype)
       ttype.scaX = -1 -- direcao do sprite 
       -- enemy turn to player - zero move
       if ma_he(state.player,enemy_ref[state.enemy.index_comp]) == 45 and state.player.x < enemy_ref[state.enemy.index_comp].x and state.turn == "enemy" then
-        move_max_zero()
+        move_max_zero(state.enemy.index_comp)
       end
     end
 
@@ -42,7 +44,7 @@ local function move_path(ttype)
       ttype.scaX = 1 -- direcao do sprite
       -- enemy turn to player - zero move
       if ma_he(state.player,enemy_ref[state.enemy.index_comp]) == 45 and state.player.x > enemy_ref[state.enemy.index_comp].x and state.turn == "enemy" then
-          move_max_zero()
+        move_max_zero(state.enemy.index_comp)
       end
     end
 
@@ -50,7 +52,6 @@ local function move_path(ttype)
     if state.range.path_final[i].x == x and state.range.path_final[i].y == y + 45 then
       state.move.rand_h = 0 ; state.move.rand_v = 2 ; save_index = i
     end
-
 
   end
 
@@ -73,6 +74,7 @@ function move_main(ttype)
   -- movement
   if state.move.active == "on" and ttype.m_max > 0 then
     if state.move.ref_index < 45 then
+      
       -- direita
       if state.move.rand_h == 1 then ttype.x = ttype.x + 4.5 end
       -- esquerda
@@ -82,6 +84,7 @@ function move_main(ttype)
       -- baixo
       if state.move.rand_v == 2 then ttype.y = ttype.y + 4.5 end 
       state.move.ref_index = state.move.ref_index + 4.5
+      
     end
   end
 
@@ -99,6 +102,11 @@ function move_main(ttype)
     if state.turn == "enemy" then
       ttype.m_max = ttype.m_max - 3 
     end
+  end
+  
+  -- if zero, no path found, reset the auto move
+  if state.range.fim.x == ttype.x and state.range.fim.y == ttype.y then
+    state.player.trigger_auto_move = false
   end
 
   -- ENEMY

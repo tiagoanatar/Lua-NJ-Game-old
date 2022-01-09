@@ -1,22 +1,11 @@
-local final_block_once = true
-local found_location = false
-
-local c_i, t_i = 0, 0 -- current check tablales index
-local min_val_tab = {i={},v={}}
-local found_l_tab = {i={},v={},x={},y={}}
-
 local current = {x = 0, y = 0} -- current position
 local index_tab = {} -- save indexes will be used
-
--- key vars
 local move_points, current_index = 0, 0 -- move points, current index
 local finaliza_tudo = "on" -- finalization var
 
 -- global ref
 local r = state.range
 
--- var factory function 
--- m_po(move points)
 local function tab_add()
   return {
     check = "off", -- off(never checked), open(can be checked), close(alredy checked)
@@ -50,7 +39,7 @@ local function range_open_grid(ttype)
   clean_tables()
 
   -- colision page
-  grid_global_update()
+  grid_global_update() --GLOBAL
   
   for i,v in ipairs(grid_global) do
     -- MOVE
@@ -133,7 +122,7 @@ function range_path_main(ttype)
 
 -- start setup
 -- PLAYER
-  if r.path_open == "on" and state.move.ref_index == 0 then 
+  if state.turn ~= "enemy" and r.path_open == "on" and state.move.ref_index == 0 then 
     start_setup(ttype)
   end
 
@@ -171,6 +160,16 @@ end
 --///////////////////////////////////////////////////////////////
 
 function range_path_final(ttype)
+  
+  local final_block_once = true
+  local found_location = false
+
+  local t_i = 0 -- current check tablales index
+  local min_val_tab = {i={},v={}}
+  local found_l_tab = {i={},v={},x={},y={}}
+  
+  -- table copy to avoid mutations
+  local copy = r.open
 
   r.temp.x = r.fim.x
   r.temp.y = r.fim.y
@@ -179,8 +178,8 @@ function range_path_final(ttype)
   if state.turn == "enemy" then
       
     if found_location == false then
-      for j,w in ipairs(r.open) do
-        if r.temp.x == r.open[j].x and r.temp.y == r.open[j].y and r.open[j].check == "close" then
+      for j,w in ipairs(copy) do
+        if r.temp.x == copy[j].x and r.temp.y == copy[j].y and copy[j].check == "close" then
           found_location = true
         end
       end
@@ -188,12 +187,12 @@ function range_path_final(ttype)
         
     if found_location == false then
       -- feed
-      for i,v in ipairs(r.open) do
-        if r.open[i].check == "close" then
+      for i,v in ipairs(copy) do
+        if copy[i].check == "close" then
           found_l_tab.i[#found_l_tab.i + 1] = i
-          found_l_tab.v[#found_l_tab.v + 1] = ma_he(r.open[i],state.player)
-          found_l_tab.x[#found_l_tab.x + 1] = r.open[i].x
-          found_l_tab.y[#found_l_tab.y + 1] = r.open[i].y
+          found_l_tab.v[#found_l_tab.v + 1] = ma_he(copy[i],state.player)
+          found_l_tab.x[#found_l_tab.x + 1] = copy[i].x
+          found_l_tab.y[#found_l_tab.y + 1] = copy[i].y
         end
       end
       -- check
@@ -218,19 +217,19 @@ function range_path_final(ttype)
 -- MAIN LOOP
   while r.temp.x ~= ttype.x or r.temp.y ~= ttype.y do
 
-    for j,w in ipairs(r.open) do
-      if r.temp.x == r.open[j].x and r.temp.y == r.open[j].y and final_block_once == true and r.open[j].check == "close" then 
-        r.open[j].final_check = "on" 
+    for j,w in ipairs(copy) do
+      if r.temp.x == copy[j].x and r.temp.y == copy[j].y and final_block_once == true and copy[j].check == "close" then 
+        copy[j].final_check = "on" 
         table.insert(r.path_final, tab_add())
-        r.path_final[#r.path_final].x = r.open[j].x
-        r.path_final[#r.path_final].y = r.open[j].y
+        r.path_final[#r.path_final].x = copy[j].x
+        r.path_final[#r.path_final].y = copy[j].y
         final_block_once = false
       end
         
-      if ma_he(r.open[j],r.temp) == 45 and r.open[j].final_check == "off" and r.open[j].check == "close" then
+      if ma_he(copy[j],r.temp) == 45 and copy[j].final_check == "off" and copy[j].check == "close" then
         min_val_tab.i[#min_val_tab.i + 1] = j
-        min_val_tab.v[#min_val_tab.v + 1] = r.open[j].m_po
-        r.open[j].final_check = "on"
+        min_val_tab.v[#min_val_tab.v + 1] = copy[j].m_po
+        copy[j].final_check = "on"
       end
     end
     
@@ -246,13 +245,13 @@ function range_path_final(ttype)
     end
     
     if t_i > 0 then
-      r.temp.x = r.open[t_i].x
-      r.temp.y = r.open[t_i].y
+      r.temp.x = copy[t_i].x
+      r.temp.y = copy[t_i].y
     
       if r.temp.x ~= ttype.x or r.temp.y ~= ttype.y then
         table.insert(r.path_final, tab_add())
-        r.path_final[#r.path_final].x = r.open[t_i].x
-        r.path_final[#r.path_final].y = r.open[t_i].y
+        r.path_final[#r.path_final].x = copy[t_i].x
+        r.path_final[#r.path_final].y = copy[t_i].y
       end
     
       t_i = 0
@@ -267,8 +266,6 @@ function range_path_final(ttype)
 
   if r.temp.x == ttype.x and r.temp.y == ttype.y then
     r.path_end = "on"
-    final_block_once = true
-    found_location = false
   end
   
 end
@@ -280,7 +277,7 @@ end
 function range_draw()
   
   for i,v in ipairs(r.open) do
-    if r.open[i].check == "close" and state.player.m_max > 0 then
+    if r.open[i].check == "close" then
       love.graphics.setColor(0,0,0,0.6)
       love.graphics.rectangle("fill", r.open[i].x, r.open[i].y, r.open[i].w, r.open[i].h)
 
@@ -291,9 +288,9 @@ function range_draw()
     end 
   end  
 
--- path final tab
+  -- path final tab
   for i,v in ipairs(r.path_final) do
-    love.graphics.setColor(0,0.4,0,0.8)
+    love.graphics.setColor(0.5,0.4,0,0.8)
     love.graphics.rectangle("fill", r.path_final[i].x, r.path_final[i].y, 45, 45)
   end
 

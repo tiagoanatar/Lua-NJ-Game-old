@@ -7,7 +7,7 @@ local central_pos = 17.5
 --// ALERT PLAYER
 --///////////////////////////////////////////////////////////////
 
-local function alert_player()
+function alert_player()
   for z,y in ipairs(enemy_ref) do
     if enemy_ref[z].comp ~= "dead" then
       enemy_ref[z].comp = "alert_player"
@@ -33,6 +33,7 @@ local function enemy_visao_reset(x, base)
   
   enemy_ref[x].v_p_ref.x = state.player.x
   enemy_ref[x].v_p_ref.y = state.player.y 
+  enemy_ref[x].loop_reset = false
   
 end
 
@@ -112,8 +113,9 @@ end
 --///////////////////////////////////////////////////
 
 function enemy_visao_update(dt)
+  
   for i,v in ipairs(enemy_ref) do
-
+  enemy_ref[i].loop_reset = true
 -- activate alert anim
 -- view player
     if enemy_ref[i].comp == "alert_player" then enemy_ref[i].alert_anim = 4
@@ -133,114 +135,114 @@ function enemy_visao_update(dt)
     -----
     -- MAIN IF
     if enemy_ref[i].comp ~= "dead" and enemy_ref[i].comp ~= "sleep" and enemy_ref[i].comp ~= "confuse" then
+      while enemy_ref[i].loop_reset == true do
+        -- move blocks - player
+        move_blocks(enemy_ref[i],enemy_ref[i].v_p,enemy_ref[i].v_p_ref,state.player,i)
 
-      -- move blocks - player
-      move_blocks(enemy_ref[i],enemy_ref[i].v_p,enemy_ref[i].v_p_ref,state.player,i)
-
-      -- declaracao extra de alert player 
-      if enemy_ref[i].scaX == 1 and state.player.x >= enemy_ref[i].x and ma_he(enemy_ref[i],state.player) == 45 then
-        alert_player()
-      elseif enemy_ref[i].scaX == -1 and state.player.x <= enemy_ref[i].x and ma_he(enemy_ref[i],state.player) == 45 then
-        alert_player()
-      end
-
-      -- CHECK A - checando colisoes em parede
-      for j,r in ipairs(grid_global) do
-        pared_coli(i,j,enemy_ref[i].v_p) -- player view
-        pared_coli(i,j,enemy_ref[i].v_e) -- enemy "
-        pared_coli(i,j,enemy_ref[i].v_i) -- item "
-      end
-
-      -- CHECK B - check player colisions
-      if enemy_ref[i].v_p.x + enemy_ref[i].v_box.w >= state.player.x
-      and enemy_ref[i].v_p.x < state.player.x + m_size_tile
-      and enemy_ref[i].v_p.y + enemy_ref[i].v_box.h >= state.player.y 
-      and enemy_ref[i].v_p.y < state.player.y + m_size_tile then
-
-        local dist = distance(enemy_ref[i],state.player) 
-
-        -- activate alert descon
-        if dist < 250 and enemy_ref[i].comp ~= "alert_player" and enemy_ref[i].comp ~= "alert_body" then 
-          enemy_ref[i].comp = "alert_desconf"
-          state.player.comp_alert = 2 -- player global var
-          state.enemy.alert_d_time = 0
-          state.enemy.alert_d = "on"
-        end
-
-        -- activate alert player
-        if dist < 200 then 
+        -- declaracao extra de alert player 
+        if enemy_ref[i].scaX == 1 and state.player.x >= enemy_ref[i].x and ma_he(enemy_ref[i],state.player) == 45 then
+          alert_player()
+        elseif enemy_ref[i].scaX == -1 and state.player.x <= enemy_ref[i].x and ma_he(enemy_ref[i],state.player) == 45 then
           alert_player()
         end
-          
-      end
-        
-      -- CHECK C - checando se bate em corpo
-      for p,k in ipairs(enemy_ref) do
-        if enemy_ref[p].comp == "dead" and enemy_ref[p].dead_check == "off" then
-          
-          -- move blocs - enemy dead  
-          move_blocks(enemy_ref[i],enemy_ref[i].v_e,enemy_ref[choose_path(enemy_ref,p)],enemy_ref[choose_path(enemy_ref,p)],i)
-            
-          if enemy_ref[i].v_e.x + enemy_ref[i].v_box.w >= enemy_ref[p].x 
-          and enemy_ref[i].v_e.x < enemy_ref[p].x + m_size_tile
-          and enemy_ref[i].v_e.y + enemy_ref[i].v_box.h >= enemy_ref[p].y 
-          and enemy_ref[i].v_e.y < enemy_ref[p].y + m_size_tile then
-                
-            enemy_ref[p].dead_check = "on"
-            
-            if enemy_ref[p].comp ~= "alert_player" then
-              state.enemy.vision.dead.x = enemy_ref[p].x
-              state.enemy.vision.dead.y = enemy_ref[p].y
-            end
-            
-            for m,n in ipairs(enemy_ref) do
-              if enemy_ref[m].comp ~= "dead" and enemy_ref[m].comp ~= "alert_player" then
-                enemy_ref[m].comp = "alert_body"
-                enemy_ref[m].change_comp = "off"
-                
-                state.player.comp_alert = 5 -- player global var
-                state.enemy.alert_p_time = 0
-                state.enemy.alert_p = "on"
-                --
-                state.enemy.alert_d_time = 0
-                state.enemy.alert_d = "off"
-              end
-            end
 
-          end
-    
+        -- CHECK A - checando colisoes em parede
+        for j,r in ipairs(grid_global) do
+          pared_coli(i,j,enemy_ref[i].v_p) -- player view
+          pared_coli(i,j,enemy_ref[i].v_e) -- enemy "
+          pared_coli(i,j,enemy_ref[i].v_i) -- item "
         end
-      end
-        
-      -- CHECK D - checando se bate em item 
-      for p,k in ipairs(grid_global) do
+
+        -- CHECK B - check player colisions
+        if enemy_ref[i].v_p.x + enemy_ref[i].v_box.w >= state.player.x
+        and enemy_ref[i].v_p.x < state.player.x + m_size_tile
+        and enemy_ref[i].v_p.y + enemy_ref[i].v_box.h >= state.player.y 
+        and enemy_ref[i].v_p.y < state.player.y + m_size_tile then
+
+          local dist = distance(enemy_ref[i],state.player) 
+
+          -- activate alert descon
+          if dist < 250 and enemy_ref[i].comp ~= "alert_player" and enemy_ref[i].comp ~= "alert_body" then 
+            enemy_ref[i].comp = "alert_desconf"
+            state.player.comp_alert = 2 -- player global var
+            state.enemy.alert_d_time = 0
+            state.enemy.alert_d = "on"
+          end
+
+          -- activate alert player
+          if dist < 200 then 
+            alert_player()
+          end
+            
+        end
+          
+        -- CHECK C - checando se bate em corpo
+        for p,k in ipairs(enemy_ref) do
+          if enemy_ref[p].comp == "dead" and enemy_ref[p].dead_check == "off" then
+            
+            -- move blocs - enemy dead  
+            move_blocks(enemy_ref[i],enemy_ref[i].v_e,enemy_ref[choose_path(enemy_ref,p)],enemy_ref[choose_path(enemy_ref,p)],i)
               
-        if grid_global[p].item == "Gold" and enemy_ref[i].comp ~= "alert_player" and enemy_ref[i].comp ~= "alert_body" then
-          
-          -- mover blocos
-          if enemy_ref[i].comp ~= "alert_item" then
-            move_blocks(enemy_ref[i],enemy_ref[i].v_i,grid_global[choose_path(grid_global,i)],grid_global[choose_path(grid_global,i)],i)
-          end
-          
-          if enemy_ref[i].v_i.x + enemy_ref[i].v_box.w >= grid_global[p].x 
-          and enemy_ref[i].v_i.x < grid_global[p].x + m_size_tile
-          and enemy_ref[i].v_i.y + enemy_ref[i].v_box.h >= grid_global[p].y 
-          and enemy_ref[i].v_i.y < grid_global[p].y + m_size_tile then
-            state.enemy.vision.item.x = grid_global[p].x
-            state.enemy.vision.item.y = grid_global[p].y
-            enemy_ref[i].comp = "alert_item"
-          end
-    
-          if enemy_ref[i].x == grid_global[p].x and enemy_ref[i].y == grid_global[p].y then
-            enemy_ref[i].comp = "stop"
-            grid_global[p].ttype = "clear"
-            grid_global[p].item = nil
-          end
-      
-        end
-        
-      end
+            if enemy_ref[i].v_e.x + enemy_ref[i].v_box.w >= enemy_ref[p].x 
+            and enemy_ref[i].v_e.x < enemy_ref[p].x + m_size_tile
+            and enemy_ref[i].v_e.y + enemy_ref[i].v_box.h >= enemy_ref[p].y 
+            and enemy_ref[i].v_e.y < enemy_ref[p].y + m_size_tile then
+                  
+              enemy_ref[p].dead_check = "on"
+              
+              if enemy_ref[p].comp ~= "alert_player" then
+                state.enemy.vision.dead.x = enemy_ref[p].x
+                state.enemy.vision.dead.y = enemy_ref[p].y
+              end
+              
+              for m,n in ipairs(enemy_ref) do
+                if enemy_ref[m].comp ~= "dead" and enemy_ref[m].comp ~= "alert_player" then
+                  enemy_ref[m].comp = "alert_body"
+                  enemy_ref[m].change_comp = "off"
+                  
+                  state.player.comp_alert = 5 -- player global var
+                  state.enemy.alert_p_time = 0
+                  state.enemy.alert_p = "on"
+                  --
+                  state.enemy.alert_d_time = 0
+                  state.enemy.alert_d = "off"
+                end
+              end
 
+            end
+      
+          end
+        end
+          
+        -- CHECK D - checando se bate em item 
+        for p,k in ipairs(grid_global) do
+                
+          if grid_global[p].item == "Gold" and enemy_ref[i].comp ~= "alert_player" and enemy_ref[i].comp ~= "alert_body" then
+            
+            -- mover blocos
+            if enemy_ref[i].comp ~= "alert_item" then
+              move_blocks(enemy_ref[i],enemy_ref[i].v_i,grid_global[choose_path(grid_global,i)],grid_global[choose_path(grid_global,i)],i)
+            end
+            
+            if enemy_ref[i].v_i.x + enemy_ref[i].v_box.w >= grid_global[p].x 
+            and enemy_ref[i].v_i.x < grid_global[p].x + m_size_tile
+            and enemy_ref[i].v_i.y + enemy_ref[i].v_box.h >= grid_global[p].y 
+            and enemy_ref[i].v_i.y < grid_global[p].y + m_size_tile then
+              state.enemy.vision.item.x = grid_global[p].x
+              state.enemy.vision.item.y = grid_global[p].y
+              enemy_ref[i].comp = "alert_item"
+            end
+      
+            if enemy_ref[i].x == grid_global[p].x and enemy_ref[i].y == grid_global[p].y then
+              enemy_ref[i].comp = "stop"
+              grid_global[p].ttype = "clear"
+              grid_global[p].item = nil
+            end
+        
+          end
+          
+        end
+      end -- while
     end 
   end 
 end

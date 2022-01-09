@@ -38,7 +38,7 @@ end
 local function index_comp_reset()
 
   if state.enemy.index_comp > #state.enemy.list then
-    state.turn = "off"
+    state.turn = "move"
     state.enemy.index_comp = 1
     enen_cont_reset() -- limpa contador
 
@@ -93,9 +93,6 @@ local function enem_move()
   -- if close to hero stop
   if ma_he(state.player,enemy_ref) == 45 and enemy_ref.comp == "alert_player" then 
     move_max_zero()
-    -- attack function
-    state.combat.enemy_active = "on"
-    combate_update()
   end
 
   -- if close to body stop
@@ -104,6 +101,7 @@ local function enem_move()
     -- muda direcao 
     muda_dire(true)
   end
+  
   -- move
   move_main(enemy_ref)
 
@@ -206,19 +204,32 @@ end
 -- 0.2  - setup final
 local function setup_final()
   
+  if ma_he(state.player,enemy_ref) == 45 and state.player.x < enemy_ref.x and enemy_ref.scaX == -1 then
+    alert_player()
+  end
+  if ma_he(state.player,enemy_ref) == 45 and state.player.x > enemy_ref.x and enemy_ref.scaX == 1 then
+    alert_player()
+  end
+  
+  -- attack function
+  if ma_he(state.player,enemy_ref) == 45 and enemy_ref.comp == "alert_player" then 
+    state.combat.enemy_active = "on"
+    combate_update()
+  end
+
   if state.combat.enemy_active == "off" then
     -- desativa o path
-    state.range.path_end = "stop" -- GLOBAL
-    state.move.ref_index = 0 
+    state.range.path_end = "stop" 
+    --state.move.ref_index = 0 
     state.move.active = "off"
-    
+
     -- change enemy
     state.enemy.index_comp = state.enemy.index_comp + 1
     
     index_comp_reset()
 
     local_var = "on" -- ativa novamente as variaveis locais
-    
+
     particles_reset() -- particles
   end
 
@@ -382,10 +393,9 @@ local function alert_player()
 end
 
 -- ///////////////////////////////////////////////////////////////
---// COMPORTAMENTOS
+--// MAIN
 --///////////////////////////////////////////////////////////////
 
--- 0 - estrutura principal
 function enemy_comp()
 
   enemy_ref = state.enemy.list[state.enemy.index_comp]
@@ -395,7 +405,7 @@ function enemy_comp()
     state.enemy.counter[state.enemy.index_comp].anim_numb = 2 -- mudando animcao do item da contagem
     -- random behavior
     if state.enemy.index_comp <= #state.enemy.list and enemy_ref.change_comp == "on" then
-      enemy_ref.comp = state.enemy.comp_random[love.math.random(1, 3)] -- chosse bahavior
+      enemy_ref.comp = state.enemy.comp_random[love.math.random(1, 2)] -- chosse bahavior
       enemy_ref.change_comp = "off" -- stop behavior change
     end
   end 

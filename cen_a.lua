@@ -44,10 +44,10 @@ end
 function cenario_a_load()
 
   -- enemy quantity
-  state.cenario.global.ene_qtd = 8 -- love.math.random(1, 3)
+  state.cenario.global.ene_qtd = 3 -- love.math.random(1, 3)
 
   -- map size
-  state.cenario.global.size = 20 --love.math.random(30, 32)
+  state.cenario.global.size = 14 --love.math.random(30, 32)
 
   -- cen type
   state.cenario.global.ttype = cen_ttype[1]

@@ -194,7 +194,7 @@ function turn_update()
   
     turn.bt_q_ctl = turn.bt_hover
     turn.bt_font = 0.5
-    state.range.path_open = "free"
+    state.range.path_open = "interupt"
     
     if love.mouse.isDown(1) or love.keyboard.isDown("i") then
       state.turn = "enemy"

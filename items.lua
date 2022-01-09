@@ -325,6 +325,7 @@ function items_draw_menu()
     text_margin = (item_size.w - text_w) / 2 
 
     -- imprime texto
+    love.graphics.setFont(asset.fonts.f1)
     love.graphics.print(item[i].name, item[i].x + text_margin, item[i].y + 85, 0, 1, 1)
 
     -- imprime number

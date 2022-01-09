@@ -35,6 +35,7 @@ state = {
     -- range
     range_open_index = 0,
     m_box = {x = 0, y = 0, w = 45, h = 45}, -- posicao final do uso do move box
+    trigger_auto_move = false,
 
     -- atk box
     a_box = {x = 0, y = 0, w = 45, h = 45}, -- posicao final do uso do ataque box
@@ -102,7 +103,8 @@ state = {
     fim = {x =0, y = 0},
     temp = {x =0, y = 0},
     path_final = {},
-    path_end = "stop"
+    path_end = "stop", -- stop, on, off
+    range_path_main = range_path_main
   },
   
   -- move

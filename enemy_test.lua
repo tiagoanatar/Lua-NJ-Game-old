@@ -32,6 +32,8 @@ local function new_enem()
 
   v_ref = {x = 0, y = 0}, v_p_ref = {x = 0, y = 0}, -- mantem posicoes de referencia quando inimigo e player estao em movimento 0
 
+  loop_reset = true, -- reset view boxes
+
   -- move
   m_max = 0, m_max_base = 10,
 
@@ -39,7 +41,10 @@ local function new_enem()
   life_dano_ref = 0, life_bar = 80, life_bar_after = 80, life_bar_hover = 0,
   
   -- type
-  ttype = ''
+  ttype = '',
+  
+  -- combat active
+  combat = 'off'
   }
 end 
 
@@ -163,8 +168,7 @@ function enemy_a_update(dt)
     enemy_ref[i].alert_type[enemy_ref[i].alert_anim]:update(dt)
   end
 
--- checagem de visao
-  if state.turn == "move" or state.turn == "enemy" then enemy_visao_update(dt) end
+  enemy_visao_update(dt) 
 
 -- comportamento do inimigo
   if state.turn == "enemy" then enemy_comp() end
@@ -210,6 +214,10 @@ function enemy_a_draw()
     love.graphics.print("y:" .. enemy_ref[i].y, enemy_ref[i].x - 60, enemy_ref[i].y + 14)
     
     -- ID
+    love.graphics.setFont(asset.fonts.f4)
+    love.graphics.setColor(255,255,255,1)
+    love.graphics.rectangle("fill", enemy_ref[i].x+36, enemy_ref[i].y+20, 20, 20)
+    love.graphics.setColor(0,0,0,1)
     love.graphics.print("ID:" .. enemy_ref[i].id, enemy_ref[i].x + 20, enemy_ref[i].y + 20, 0, 1, 1)
       
   end

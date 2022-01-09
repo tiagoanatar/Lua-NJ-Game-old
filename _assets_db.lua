@@ -23,7 +23,9 @@ function assets()
     
     fonts = {
       f1 = love.graphics.newFont("fonts/Roboto-Regular.ttf", 12),
-      f2 = love.graphics.newFont("fonts/Roboto-Regular.ttf", 39)
+      f2 = love.graphics.newFont("fonts/Roboto-Regular.ttf", 39),
+      f3 = love.graphics.newFont("fonts/Roboto-Regular.ttf", 12),
+      f4 = love.graphics.newFont("fonts/Roboto-Regular.ttf", 18),
     },
     
     music = {

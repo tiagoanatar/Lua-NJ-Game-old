@@ -20,9 +20,11 @@ local function play_mov()
   elseif key_r then
     state.player.scaX = 1
   end
+  
+  --local mouse_click_holder = false
 
   -- mouse click control
-  if love.mouse.isDown(1) == false and state.range.path_end == "stop" then
+  if love.mouse.isDown(1) == false and state.range.path_end == "stop" and is_open_block() then
     mouse_release = true
   end
   
@@ -31,21 +33,20 @@ local function play_mov()
     
     -- update all the time to get the index
     mouse_action_box_update(state.player.m_box)
-
-    if state.player.range_open_index > 0 then
+    
+    --[[if state.player.range_open_index > 0 then
       state.range.fim.x = state.range.open[state.player.range_open_index].x
       state.range.fim.y = state.range.open[state.player.range_open_index].y
       state.player.range_open_index = 0
-      state.range.path_end = "off" -- GLOBAL
-      range_path_final(state.player) -- GLOBAL
+      state.range.path_end = "off"
+      range_path_final(state.player)
       mouse_release = false
-    end
+    end]]--
       
   end
 
   -- PLAYER RESET - if reach destiny stop
-  if state.range.path_end == "on" and state.turn == "move" and state.range.fim.x == state.player.x 
-  and state.range.fim.y == state.player.y then 
+  if state.range.path_end == "on" and state.turn == "move" and state.range.fim.x == state.player.x and state.range.fim.y == state.player.y then 
     state.range.path_end = "stop"
   end
 
@@ -76,7 +77,17 @@ local function play_mov()
 
   -- move function
   if state.move.key == "on" or state.range.path_end == "on" then
-    move_main(state.player)
+    if state.player.trigger_auto_move == true then
+      move_main(state.player)
+    else 
+      state.range.path_open = "interupt"
+      state.range.path_end = "stop" 
+    end
+  end
+  
+  -- reset auto move
+  if state.player.m_max == 0 then
+    state.player.trigger_auto_move = false
   end
 
 end
@@ -195,7 +206,7 @@ function play_update(dt)
     state.player.a_box.y = state.player.y
   end
 
-  if state.turn ~= "off" and state.turn ~= "enemy" and state.range.path_end ~= "off" and state.range.path_end ~= "on" then
+  if state.turn ~= "off" and state.turn ~= "enemy" and state.range.path_end == "stop" then
     --range calculation  
     if state.move.ref_index == 0 and state.range.path_open == "free" then
       state.range.path_open = "on"
@@ -363,9 +374,9 @@ function play_ui()
   love.graphics.print("alep:" .. state.enemy.alert_p_time, camera.x + 20, camera.y + 80, 0, 1, 1)
   love.graphics.print("turno:" .. state.turn, camera.x + 120, camera.y + 80, 0, 1, 1)
 
-  love.graphics.print("atack_combat_active:" .. state.combat.atack_active, camera.x + 20, camera.y + 120, 0, 1, 1)
-  love.graphics.print("player.a_max_use:" .. state.player.a_max_use, camera.x + 20, camera.y + 140, 0, 1, 1)
-  -- love.graphics.print("armor qtd:" .. item[7].qtd, camera.x + 20, camera.y + 160, 0, 1, 1)
+  love.graphics.print("max move:" .. state.player.m_max, camera.x + 20, camera.y + 120, 0, 1, 1)
+  love.graphics.print("path_end:" .. state.range.path_end, camera.x + 20, camera.y + 140, 0, 1, 1)
+  love.graphics.print("state.move.ref_index:" .. state.move.ref_index, camera.x + 20, camera.y + 160, 0, 1, 1)
 
   --love.graphics.print("smoke use:" .. item[6].use, camera.x + 20, camera.y + 200, 0, 1, 1)
   --love.graphics.print("smoke dura:" .. item[6].dura, camera.x + 20, camera.y + 220, 0, 1, 1)
