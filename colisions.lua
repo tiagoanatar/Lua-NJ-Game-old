@@ -84,22 +84,28 @@ end
 -- GRID GLOBAL UPDATE
 function grid_global_update()
   
-  for i,v in ipairs(grid_global) do
+  for y,v in ipairs(grid_global) do
+    for x,w in ipairs(grid_global[y]) do
+      
+      if grid_global[y][x].line == true then 
+        grid_global[y][x].line = false
+      end
 
-    if grid_global[i].ttype == "enemy" then 
-      grid_global[i].ttype = "clear"
-    end
-    
-    for j,w in ipairs(enemy_ref) do
-      if enemy_ref[j].x == grid_global[i].x and enemy_ref[j].y == grid_global[i].y and enemy_ref[j].comp ~= "dead" then 
-        grid_global[i].ttype = "enemy" 
+      if grid_global[y][x].ttype == "enemy" then 
+        grid_global[y][x].ttype = "clear"
+      end
+      
+      for j,w in ipairs(enemy_ref) do
+        if enemy_ref[j].x == grid_global[y][x].x and enemy_ref[j].y == grid_global[y][x].y and enemy_ref[j].comp ~= "dead" then 
+          grid_global[y][x].ttype = "enemy" 
+        end 
+      end
+      
+      if state.turn == "enemy" and enemy_ref[state.enemy.index_comp].x == grid_global[y][x].x and enemy_ref[state.enemy.index_comp].y == grid_global[y][x].y and enemy_ref[state.enemy.index_comp].comp ~= "dead" then 
+        grid_global[y][x].ttype = "clear" 
       end 
-    end
-    
-    if state.turn == "enemy" and enemy_ref[state.enemy.index_comp].x == grid_global[i].x and enemy_ref[state.enemy.index_comp].y == grid_global[i].y and enemy_ref[state.enemy.index_comp].comp ~= "dead" then 
-      grid_global[i].ttype = "clear" 
-    end 
         
+    end
   end
   
 end
@@ -120,13 +126,15 @@ function colisao_main(n,pos_val_x,pos_val_y)
   -- bloqueia mov - move
   if state.turn == "move" then
     local position_check = false -- if position does not exist, dont move
-    for i,v in ipairs(grid_global) do 
-      if n.x + pos_val_x == grid_global[i].x and n.y + pos_val_y == grid_global[i].y then
-        position_check = true
-      end
-      if grid_global[i].ttype == "wall" or grid_global[i].ttype == "enemy" then
-        if n.x + pos_val_x == grid_global[i].x and n.y + pos_val_y == grid_global[i].y then
-          return 1
+    for y,v in ipairs(grid_global) do 
+      for x,w in ipairs(grid_global[y]) do 
+        if n.x + pos_val_x == grid_global[y][x].x and n.y + pos_val_y == grid_global[y][x].y then
+          position_check = true
+        end
+        if grid_global[y][x].ttype == "wall" or grid_global[y][x].ttype == "enemy" then
+          if n.x + pos_val_x == grid_global[y][x].x and n.y + pos_val_y == grid_global[y][x].y then
+            return 1
+          end
         end
       end
     end

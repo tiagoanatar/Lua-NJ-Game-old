@@ -23,9 +23,10 @@ function cen_random_maze(map_size, map)
 	local function map_gen()
     return
     {
-    ttype = 1, -- 0 free, 1 block
+    ttype = "clear",
     frontier = "off", -- off, on, checked
-    current = "off"
+    current = "off",
+    x = 0, y = 0, w = 45, h = 45, item = 0
     }
 	end
 
@@ -34,7 +35,9 @@ function cen_random_maze(map_size, map)
     table.insert(map, {})
 		for j = 1, map_size do
       table.insert(map[i], map_gen())
-      map[i][j].ttype = 0
+      map[i][j].ttype = "clear"
+      map[i][j].y = (i - 1) * 45
+      map[i][j].x = (j - 1) * 45
 		end
 	end
 
@@ -42,7 +45,7 @@ function cen_random_maze(map_size, map)
 	local function add_frontier(y,x)
     if x < 1 or y < 1 or y > map_size or x > map_size then
       return false
-    elseif map[y][x].ttype == 0 then
+    elseif map[y][x].ttype == "clear" then
       map[y][x].frontier = "on"
     end
 	end
@@ -55,7 +58,7 @@ function cen_random_maze(map_size, map)
   
 	-- add neibour
 	local function add_neibor(y,x)
-		map[y][x].ttype = 1
+		map[y][x].ttype = "wall"
 	end
 
 	-- set pass current
@@ -84,7 +87,7 @@ function cen_random_maze(map_size, map)
       front_current_y = rand_array[rand][1]
       front_current_x = rand_array[rand][2]
 
-      map[front_current_y][front_current_x].ttype = 1
+      map[front_current_y][front_current_x].ttype = "wall"
 
       -- stack feed
       table.insert(map_stack, 1, {})
@@ -117,7 +120,7 @@ function cen_random_maze(map_size, map)
 	map[3][3].current = "on"
 	pass_current_y = 3
 	pass_current_x = 3
-	map[3][3].ttype = 1
+	map[3][3].ttype = "wall"
 
 	-- stack feed  
   table.insert(map_stack, 1, {})
@@ -141,7 +144,7 @@ function cen_random_maze(map_size, map)
 		call_add_frontier()
 
 		-- new current frontier
-		random_frontier();
+		random_frontier()
 
 		while #rand_array == 0 and #map_stack > 0 do
       table.remove(map_stack, 1)

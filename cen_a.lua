@@ -11,27 +11,27 @@ local cb_a_draw = 0
 local pared_im_baix = 0
 
 -- variaveis da grid
-local grid = {}
+--grid = {}
 local grid_raiz = 0
 
 -- factory function
 local function tab_add()
-  return {x = 0, y = 0, w = 45, h = 45, ttype = "clear", item = 0}
+  return {x = 0, y = 0, w = 45, h = 45, ttype = "clear", item = 0, line = false}
 end
 
 -- grid generator
 local function feed_grid()
   for x=1, state.cenario.global.size do
-    table.insert(grid, {})
+    table.insert(grid_global, {})
     for i=1, state.cenario.global.size do 
-      table.insert(grid[x], {ttype = 0})
+      table.insert(grid_global[x], {ttype = 0})
       -- adicionando aleatoriedade dos blocos que serao de colisao
       local random_coli = love.math.random(1, 12)  
 
       if random_coli == 1 then 
-        grid[x][i].ttype = 1
+        grid_global[x][i].ttype = 'wall'
       else
-        grid[x][i].ttype = 0
+        grid_global[x][i].ttype = 'clear'
       end
     end
   end
@@ -60,7 +60,7 @@ function cenario_a_load()
   --feed_grid()
 
   -- room generator
-  cen_random_maze(state.cenario.global.size, grid)
+  cen_random_maze(state.cenario.global.size, grid_global)
 
   -- fix grid feed
   --grid = cen_op_01
@@ -87,36 +87,20 @@ function cenario_a_load()
   texture_quad = love.graphics.newQuad(0, 0, state.cenario.global.textura_w , state.cenario.global.textura_h, texture_draw:getWidth(), texture_draw:getHeight())
 
   -- walls generator
-  for y,v in ipairs(grid) do
-    for x,w in ipairs(grid[y]) do
-      
-      table.insert(grid_global, tab_add())
-      grid_global[#grid_global].x = (y-1) * 45
-      grid_global[#grid_global].y = (x-1) * 45
-      
-      -- WALL
-      if grid[y][x].ttype == 1 then
-        grid_global[#grid_global].ttype = "wall" 
-      end
-      
-      -- end/edges always free
-      if y == state.cenario.global.size or x == state.cenario.global.size then
-        grid_global[#grid_global].ttype = "clear" 
-      end
+  for y,v in ipairs(grid_global) do
+    for x,w in ipairs(grid_global[y]) do
       
       -- DOORS
       local rand = love.math.random(1, 10)
       
       -- 2 entry passages - horizontal wall
-      if x > 3 and x < state.cenario.global.size-3 and rand == 1 and grid[y][x+1].ttype == 1 and grid[y][x-1].ttype == 1 then
-        grid_global[#grid_global].ttype = "clear"
-        grid[y][x].ttype = 0
+      if x > 3 and x < state.cenario.global.size-3 and rand == 1 and grid_global[y][x+1].ttype == 1 and grid_global[y][x-1].ttype == 1 then
+        grid_global[y][x].ttype = "clear"
       end
       
       -- 2 entry passages - vertical wall
-      if y > 3 and y < state.cenario.global.size-3 and rand == 1 and grid[y+1][x].ttype == 1 and grid[y-1][x].ttype == 1 then
-        grid_global[#grid_global].ttype = "clear"
-        grid[y][x].ttype = 0
+      if y > 3 and y < state.cenario.global.size-3 and rand == 1 and grid_global[y+1][x].ttype == 1 and grid_global[y-1][x].ttype == 1 then
+        grid_global[y][x].ttype = "clear"
       end
   
     end

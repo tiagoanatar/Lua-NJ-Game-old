@@ -108,26 +108,47 @@ local function choose_path(tipo,ene_index)
     
 end
 
+--//////////////////////////
+
+local function get_grid_position(j)
+  
+  local ey, ex, py, px
+  
+  for y,v in ipairs(grid_global) do
+    for x,w in ipairs(grid_global[y]) do
+    
+      if enemy_ref[j].x == grid_global[y][x].x and enemy_ref[j].y == grid_global[y][x].y then
+        ey = y
+        ex = x
+      end 
+      if state.player.x == grid_global[y][x].x and state.player.y == grid_global[y][x].y then 
+        py = y
+        px = x
+      end 
+      
+    end
+  end
+  
+  return {ey = ey, ex = ex, py = py, px = px}
+end
+
 -- ///////////////////////////////////////////////////
 --// VISAO UPDATE
 --///////////////////////////////////////////////////
 
-function enemy_visao_update(dt)
+function enemy_vision_update(dt)
   
   for i,v in ipairs(enemy_ref) do
-  enemy_ref[i].loop_reset = true
--- activate alert anim
--- view player
+   
+    enemy_ref[i].loop_reset = true
+  
+    -- activate alert anim
     if enemy_ref[i].comp == "alert_player" then enemy_ref[i].alert_anim = 4
--- view body
     elseif enemy_ref[i].comp == "alert_body" then enemy_ref[i].alert_anim = 5
--- view descon
     elseif enemy_ref[i].comp == "alert_desconf" then enemy_ref[i].alert_anim = 2 
--- viu descon
     elseif enemy_ref[i].comp == "alert_item" then enemy_ref[i].alert_anim = 2 
--- confuse
     elseif enemy_ref[i].comp == "confuse" then enemy_ref[i].alert_anim = 6
--- deactivate marker
+    -- deactivate marker
     else 
       enemy_ref[i].alert_anim = 1 
     end
@@ -135,7 +156,7 @@ function enemy_visao_update(dt)
     -----
     -- MAIN IF
     if enemy_ref[i].comp ~= "dead" and enemy_ref[i].comp ~= "sleep" and enemy_ref[i].comp ~= "confuse" then
-      while enemy_ref[i].loop_reset == true do
+
         -- move blocks - player
         move_blocks(enemy_ref[i],enemy_ref[i].v_p,enemy_ref[i].v_p_ref,state.player,i)
 
@@ -145,33 +166,42 @@ function enemy_visao_update(dt)
         elseif enemy_ref[i].scaX == -1 and state.player.x <= enemy_ref[i].x and ma_he(enemy_ref[i],state.player) == 45 then
           alert_player()
         end
+        
+        local pos = get_grid_position(i)
+        
+        local find_line
 
-        -- CHECK A - checando colisoes em parede
-        for j,r in ipairs(grid_global) do
-          pared_coli(i,j,enemy_ref[i].v_p) -- player view
-          pared_coli(i,j,enemy_ref[i].v_e) -- enemy "
-          pared_coli(i,j,enemy_ref[i].v_i) -- item "
+        -- breseham line 
+        if pos.py ~= nil and pos.ey ~= nil then
+          find_line = bresenham.los(pos.ey,pos.ex,pos.py,pos.px, function(y,x)
+            if grid_global[y][x].ttype == 'wall' then return false end
+              grid_global[y][x].line = true
+            return true
+          end)
         end
+        
+        -- CHECK A - check player colisions
+        if find_line then
 
-        -- CHECK B - check player colisions
-        if enemy_ref[i].v_p.x + enemy_ref[i].v_box.w >= state.player.x
-        and enemy_ref[i].v_p.x < state.player.x + m_size_tile
-        and enemy_ref[i].v_p.y + enemy_ref[i].v_box.h >= state.player.y 
-        and enemy_ref[i].v_p.y < state.player.y + m_size_tile then
-
-          local dist = distance(enemy_ref[i],state.player) 
-
-          -- activate alert descon
-          if dist < 250 and enemy_ref[i].comp ~= "alert_player" and enemy_ref[i].comp ~= "alert_body" then 
-            enemy_ref[i].comp = "alert_desconf"
-            state.player.comp_alert = 2 -- player global var
-            state.enemy.alert_d_time = 0
-            state.enemy.alert_d = "on"
-          end
-
-          -- activate alert player
-          if dist < 200 then 
-            alert_player()
+          if enemy_ref[i].scaX == 1 and state.player.x >= enemy_ref[i].x or 
+          enemy_ref[i].scaX == -1 and state.player.x <= enemy_ref[i].x then
+            
+            local dist = distance(enemy_ref[i],state.player) 
+            
+            -- activate alert destrust
+            if dist < 250 and enemy_ref[i].comp ~= "alert_player" and 
+            enemy_ref[i].comp ~= "alert_body" then 
+              enemy_ref[i].comp = "alert_desconf"
+              state.player.comp_alert = 2
+              state.enemy.alert_d_time = 0
+              state.enemy.alert_d = "on"
+            end
+            
+            -- activate alert player
+            if dist < 200 then 
+              alert_player()
+            end
+          
           end
             
         end
@@ -242,7 +272,7 @@ function enemy_visao_update(dt)
           end
           
         end
-      end -- while
+
     end 
   end 
 end

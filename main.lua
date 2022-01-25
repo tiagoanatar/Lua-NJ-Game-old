@@ -3,18 +3,20 @@
 --///////////////////////////////////////////////////////////////
 
 -- anim 8 - (animation/sprites)
-anim8 = require "libs/anim8"
+anim8 = require 'libs/anim8'
 
 -- suit - (menu)
-suit = require "suit-master"
+suit = require 'suit-master'
 
 -- camera (my library)
-require "libs/camera"
+require 'libs/camera'
 
 -- particles (particles system)
-require "libs/particles"
+require 'libs/particles'
 
-Luven = require "libs/luven/luven"
+Luven = require 'libs/luven/luven'
+
+bresenham = require 'libs/bresenham'
 
 -- ///////////////////////////////////////////////////////////////
 --// IMPORT FILES
@@ -109,9 +111,11 @@ function love.load()
   Luven.camera:setScale(1) -- set a x2 zoom on the camera.
 
   -- adding ligths
-  for n,v in ipairs(grid_global) do
-    if grid_global[n].ttype == "wall" and grid_global[n].elements == 2 then 
-      lightId = Luven.addFlickeringLight(grid_global[n].x+5, grid_global[n].y+44, { min = { 97/255, 90/255, 17/255, 0.6 }, max = { 87/255, 80/255, 7/255, 01 } }, { min = 0.75, max = 1 }, { min = 0.12, max = 0.2 })
+  for y,v in ipairs(grid_global) do
+    for x,w in ipairs(grid_global[y]) do
+      if grid_global[y][x].ttype == "wall" and grid_global[y][x].elements == 2 then 
+        lightId = Luven.addFlickeringLight(grid_global[y][x].x+5, grid_global[y][x].y+44, { min = { 97/255, 90/255, 17/255, 0.6 }, max = { 87/255, 80/255, 7/255, 01 } }, { min = 0.75, max = 1 }, { min = 0.12, max = 0.2 })
+      end
     end
   end
   

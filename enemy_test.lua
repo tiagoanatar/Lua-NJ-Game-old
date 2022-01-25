@@ -112,18 +112,20 @@ end
 
 local function rand_posi()
   
-    local rand = love.math.random(1, #grid_global)
+    local y = love.math.random(1, #grid_global)
+    local x = love.math.random(1, #grid_global)
     local fim = "off"
     
     repeat
-        if grid_global[rand].ttype == "clear" and ma_he(grid_global[rand],state.player) > 270 then
-            fim = "on"
-        else
-            rand = love.math.random(1, #grid_global)
-        end
+      if grid_global[y][x].ttype == "clear" and ma_he(grid_global[y][x], state.player) > 270 then
+        fim = "on"
+      else
+        y = love.math.random(1, #grid_global)
+        x = love.math.random(1, #grid_global)
+      end
     until fim == "on"
     
-    return rand
+    return {y = y, x = x}
 
 end
 
@@ -146,8 +148,8 @@ function enemy_a_load()
     animation(i)
           
     -- posicao - evita paredes
-    local ind = rand_posi()
-    enemy_ref[i].x = grid_global[ind].x ; enemy_ref[i].y = grid_global[ind].y
+    local data = rand_posi()
+    enemy_ref[i].x = grid_global[data.y][data.x].x ; enemy_ref[i].y = grid_global[data.y][data.x].y
 
   end
 
@@ -168,7 +170,7 @@ function enemy_a_update(dt)
     enemy_ref[i].alert_type[enemy_ref[i].alert_anim]:update(dt)
   end
 
-  enemy_visao_update(dt) 
+  enemy_vision_update(dt) 
 
 -- comportamento do inimigo
   if state.turn == "enemy" then enemy_comp() end

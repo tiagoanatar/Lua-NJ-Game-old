@@ -13,10 +13,10 @@ local function tab_add()
   }
 end
 
-local function tab_feed(x)
+local function tab_feed(y,x)
   table.insert(r.open, tab_add())
-  r.open[#r.open].x = grid_global[x].x
-  r.open[#r.open].y = grid_global[x].y  
+  r.open[#r.open].x = grid_global[y][x].x
+  r.open[#r.open].y = grid_global[y][x].y  
 end
 
 -- ///////////////////////////////////////////////////////////////
@@ -41,40 +41,43 @@ local function range_open_grid(ttype)
   -- colision page
   grid_global_update() --GLOBAL
   
-  for i,v in ipairs(grid_global) do
-    -- MOVE
-    if state.turn == "move" then
-      if grid_global[i].ttype == "clear" or grid_global[i].ttype == "item" then
-        tab_feed(i)
+  for y,v in ipairs(grid_global) do
+    for x,w in ipairs(grid_global[y]) do
+      
+      -- MOVE
+      if state.turn == "move" then
+        if grid_global[y][x].ttype == "clear" or grid_global[y][x].ttype == "item" then
+          tab_feed(y,x)
+        end
       end
-    end
-    -- ITEM
-    if state.turn == "item" and ma_he(grid_global[i],ttype) <= (45 * ttype.i_max) then  
-      if grid_global[i].ttype == "clear" or grid_global[i].ttype == "enemy" or grid_global[i].ttype == "item" then
-        tab_feed(i)
+      -- ITEM
+      if state.turn == "item" and ma_he(grid_global[y][x],ttype) <= (45 * ttype.i_max) then  
+        if grid_global[y][x].ttype == "clear" or grid_global[y][x].ttype == "enemy" or grid_global[y][x].ttype == "item" then
+          tab_feed(y,x)
+        end
       end
-    end
-    -- ATTACK
-    if state.turn == "attack" and ma_he(grid_global[i],ttype) <= (45 * ttype.a_max) then  
-      if grid_global[i].ttype == "clear" or grid_global[i].ttype == "enemy" or grid_global[i].ttype == "item" then
-        tab_feed(i)
+      -- ATTACK
+      if state.turn == "attack" and ma_he(grid_global[y][x],ttype) <= (45 * ttype.a_max) then  
+        if grid_global[y][x].ttype == "clear" or grid_global[y][x].ttype == "enemy" or grid_global[y][x].ttype == "item" then
+          tab_feed(y,x)
+        end
       end
-    end
-    -- ENEMY
-    if state.turn == "enemy" then  
-      if grid_global[i].ttype == "clear" or grid_global[i].ttype == "item" then
-        tab_feed(i)
+      -- ENEMY
+      if state.turn == "enemy" then  
+        if grid_global[y][x].ttype == "clear" or grid_global[y][x].ttype == "item" then
+          tab_feed(y,x)
+        end
       end
-    end
+      
+      -- save current index
+      if #r.open > 0 then
+        if r.open[#r.open].x == current.x and r.open[#r.open].y == current.y then
+          current_index = #r.open
+          r.open[#r.open].check = "close"
+        end
+      end
     
-    -- save current index
-    if #r.open > 0 then
-      if r.open[#r.open].x == current.x and r.open[#r.open].y == current.y then
-        current_index = #r.open
-        r.open[#r.open].check = "close"
-      end
-    end
-
+    end -- END FOR
   end -- END FOR
 
 end

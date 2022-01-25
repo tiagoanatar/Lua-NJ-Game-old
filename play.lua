@@ -33,15 +33,6 @@ local function play_mov()
     
     -- update all the time to get the index
     mouse_action_box_update(state.player.m_box)
-    
-    --[[if state.player.range_open_index > 0 then
-      state.range.fim.x = state.range.open[state.player.range_open_index].x
-      state.range.fim.y = state.range.open[state.player.range_open_index].y
-      state.player.range_open_index = 0
-      state.range.path_end = "off"
-      range_path_final(state.player)
-      mouse_release = false
-    end]]--
       
   end
 
