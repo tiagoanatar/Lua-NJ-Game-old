@@ -266,11 +266,11 @@ function cen_design_draw()
             -- sword
             if grid_global[y][x].elements == 3 then
                 if grid_global[y][x].design_var == 1 then
-                    love.graphics.draw(c_design.dojo.wall.elements[3][1], grid_global[y][x].x, grid_global[y][x].y+54)
+                  love.graphics.draw(c_design.dojo.wall.elements[3][1], grid_global[y][x].x, grid_global[y][x].y+54)
                 elseif grid_global[y][x].design_var == 2 then
-                    love.graphics.draw(c_design.dojo.wall.elements[3][2], grid_global[y][x].x, grid_global[y][x].y+54)
+                  love.graphics.draw(c_design.dojo.wall.elements[3][2], grid_global[y][x].x, grid_global[y][x].y+54)
                 elseif grid_global[y][x].design_var == 3 then
-                    love.graphics.draw(c_design.dojo.wall.elements[3][3], grid_global[y][x].x, grid_global[y][x].y+54)
+                  love.graphics.draw(c_design.dojo.wall.elements[3][3], grid_global[y][x].x, grid_global[y][x].y+54)
                 end
             end
             
@@ -327,6 +327,11 @@ player_draw()
         love.graphics.setColor(0.5,0,0,0.8)
         love.graphics.rectangle("fill", grid_global[y][x].x, grid_global[y][x].y, 45, 45)
       end
+      
+      -- ITEM TEST 
+      --if grid_global[y][x].ttype == "item" then
+        --love.graphics.print(grid_global[y][x].item, grid_global[y][x].x + 10, grid_global[y][x].y + 10, 0, 1, 1)
+      --end
       
     end
   end

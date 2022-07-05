@@ -91,12 +91,12 @@ local function move_max_zero() enemy_ref.m_max = 0 end
 local function enem_move()
 
   -- if close to hero stop
-  if ma_he(state.player,enemy_ref) == 45 and enemy_ref.comp == "alert_player" then 
+  if func:ma_he(state.player,enemy_ref) == 45 and enemy_ref.comp == "alert_player" then 
     move_max_zero()
   end
 
   -- if close to body stop
-  if ma_he(state.enemy.vision.dead,enemy_ref) == 45 and enemy_ref.comp ~= "alert_desconf" and enemy_ref.comp ~= "alert_player" then 
+  if func:ma_he(state.enemy.vision.dead,enemy_ref) == 45 and enemy_ref.comp ~= "alert_desconf" and enemy_ref.comp ~= "alert_player" then 
     move_max_zero()
     -- muda direcao 
     muda_dire(true)
@@ -108,7 +108,7 @@ local function enem_move()
 end
 
 -- ///////////////////////////////////////////////////////////////
---// DIRECAO PATHFIND
+--// PATHFIND DIRECTION
 --///////////////////////////////////////////////////////////////
 
 -- comp - normal
@@ -158,7 +158,7 @@ local function dire_diago_path()
   -- alimentando posicao escolhida
     state.range.fim.x = enemy_ref.x
     state.range.fim.y = enemy_ref.y
-
+print(1)
   -- acabado o for desativa toda essa area
     state.range.path_end = "off"
       
@@ -198,21 +198,23 @@ local function setup_inicial()
 
   enemy_ref.m_max = enemy_ref.m_max_base
   local_var = "off" -- turn off setup
+  dire_diago_path() 
+  range_path_final(enemy_ref)
 
 end
 
 -- 0.2  - setup final
 local function setup_final()
   
-  if ma_he(state.player,enemy_ref) == 45 and state.player.x < enemy_ref.x and enemy_ref.scaX == -1 then
+  if func:ma_he(state.player,enemy_ref) == 45 and state.player.x < enemy_ref.x and enemy_ref.scaX == -1 then
     alert_player()
   end
-  if ma_he(state.player,enemy_ref) == 45 and state.player.x > enemy_ref.x and enemy_ref.scaX == 1 then
+  if func:ma_he(state.player,enemy_ref) == 45 and state.player.x > enemy_ref.x and enemy_ref.scaX == 1 then
     alert_player()
   end
   
   -- attack function
-  if ma_he(state.player,enemy_ref) == 45 and enemy_ref.comp == "alert_player" then 
+  if func:ma_he(state.player,enemy_ref) == 45 and enemy_ref.comp == "alert_player" then 
     state.combat.enemy_active = "on"
     combate_update()
   end
@@ -220,8 +222,6 @@ local function setup_final()
   if state.combat.enemy_active == "off" then
     -- desativa o path
     state.range.path_end = "stop" 
-    --state.move.ref_index = 0 
-    state.move.active = "off"
 
     -- change enemy
     state.enemy.index_comp = state.enemy.index_comp + 1
@@ -260,16 +260,6 @@ local function comp_path_diago()
   -- random direction
     state.move.rand_path_diago = love.math.random(1, 4)
     setup_inicial()
-  end
-
-  -- escolhendo a direcao
-  if state.range.path_end == "stop" and enemy_ref.m_max > 0 then -- GLOBAL
-    dire_diago_path() 
-  end
-
-  -- ativa path find
-  if state.range.path_end == "off" then -- GLOBAL
-    range_path_final(enemy_ref)
   end
 
   -- so ativa somente quando o path find acabar suas opearacoes
@@ -375,9 +365,7 @@ local function alert_player()
   -- so ativa somente quando o path find acabar suas opearacoes
   if state.range.path_end == "on" then
 
-    if enemy_ref.comp == "alert_body" then
-      -- nil
-    else
+    if enemy_ref.comp ~= "alert_body" then
       muda_dire(false) 
     end
 

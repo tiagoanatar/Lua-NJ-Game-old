@@ -33,22 +33,16 @@ end
 local function item_box_move()
   
   if key_l and key_r == false and key_u == false and key_d == false and state.player.item_click == "off" and colisao_main(state.player.i_box,-45,0) == 1 then
-        
     state.player.i_box.x = state.player.i_box.x - 45
     state.player.item_click = "on"
-
   end   
   if key_r and key_l == false and key_u == false and key_d == false and state.player.item_click == "off" and colisao_main(state.player.i_box,45,0) == 1 then
-    
     state.player.i_box.x = state.player.i_box.x + 45
     state.player.item_click = "on"
-
   end  
   if key_u and key_l == false and key_r == false and key_d == false and state.player.item_click == "off" and colisao_main(state.player.i_box,0,-45) == 1 then
-    
     state.player.i_box.y = state.player.i_box.y - 45
     state.player.item_click = "on"
-
   end
   if key_d and key_l == false and key_r == false and key_u == false and state.player.item_click == "off" and colisao_main(state.player.i_box,0,45) == 1 then
     state.player.i_box.y = state.player.i_box.y + 45
@@ -62,7 +56,7 @@ local function item_box_move()
   --
 
   -- mouse box move
-  mouse_action_box_update(state.player.i_box)
+  func:mouse_action_box_update(state.player.i_box)
     
 end
 
@@ -456,10 +450,12 @@ function items_draw_use()
   -- itens alimentados na tabela geral
   -----
   love.graphics.setColor(1, 1, 1, 1) -- normalizador de cor
-  for i,v in ipairs(grid_global) do
-    for x = 1, 5 do
-      if grid_global[i].item == item[x].name then
-        love.graphics.draw(item[x].img, item_quad[1], grid_global[i].x + 10, grid_global[i].y + 10, 0, 0.3, 0.3)
+  for y,v in ipairs(grid_global) do
+    for x,w in ipairs(grid_global) do
+      for p = 1, 5 do
+        if grid_global[y][x].item == item[p].name then
+          love.graphics.draw(item[p].img, item_quad[1], grid_global[y][x].x + 10, grid_global[y][x].y + 10, 0, 0.3, 0.3)
+        end
       end
     end
   end
@@ -485,51 +481,48 @@ function items_use()
   end
 
   -- range item + key press use
-  if temp_index > 0 then 
-    if item[temp_index].use == "using" then
-      if love.mouse.isDown(1) then
-        for i,v in ipairs(grid_global) do  
-  
-          -- item no chao
-          if temp_index == 4 or temp_index == 5 or temp_index == 6 then
-            if state.player.i_box.x == grid_global[i].x and state.player.i_box.y == grid_global[i].y and grid_global[i].ttype == "clear" then
-              item[temp_index].drop = "floor"
-              grid_global[i].ttype = "item"
-              grid_global[i].item = item[temp_index].name
-              item_gasto(temp_index)
-              item[temp_index].drop_p.x = grid_global[i].x
-              item[temp_index].drop_p.y = grid_global[i].y
-            end
-          end
-          
-          -- item no inimigo
-          if temp_index == 1 or temp_index == 2 or temp_index == 3 and combate_screen == "off" then
-            if state.player.i_box.x == grid_global[i].x and state.player.i_box.y == grid_global[i].y and grid_global[i].ttype == "enemy" then
-              
-              item[temp_index].drop = "enemy"  
-              item[temp_index].drop_p.x = grid_global[i].x
-              item[temp_index].drop_p.y = grid_global[i].y
-              item_gasto(temp_index)
+  if temp_index > 0 and item[temp_index].use == "using" and love.mouse.isDown(1) then
+    for y,v in ipairs(grid_global) do
+      for x,w in ipairs(grid_global[y]) do
 
-              -- guardando informacao do inimigo
-              for j,w in ipairs(enemy_ref) do 
-                if enemy_ref[j].x == item[temp_index].drop_p.x and enemy_ref[j].y == item[temp_index].drop_p.y then
-                  item[temp_index].drop_enemy_i = j
-                end
-              end
-              i_box_reset()
-              
-              -- bomb
-              if temp_index == 1 then
-                item[1].use = "active"
-                item[1].dura = item[1].dura_ref
-              end
-                
-            end
+        -- item on the floor
+        if temp_index == 4 or temp_index == 5 or temp_index == 6 then
+          if state.player.i_box.x == grid_global[y][x].x and state.player.i_box.y == grid_global[y][x].y and grid_global[y][x].ttype == "clear" then
+            item[temp_index].drop = "floor"
+            grid_global[y][x].ttype = "item"
+            grid_global[y][x].item = item[temp_index].name
+            item_gasto(temp_index)
+            item[temp_index].drop_p.x = grid_global[y][x].x
+            item[temp_index].drop_p.y = grid_global[y][x].y
           end
-            
         end
-      end
+      
+        -- item on enemy
+        if temp_index == 1 or temp_index == 2 or temp_index == 3 and combate_screen == "off" then
+          if state.player.i_box.x == grid_global[y][x].x and state.player.i_box.y == grid_global[y][x].y and grid_global[y][x].ttype == "enemy" then
+            
+            item[temp_index].drop = "enemy"  
+            item[temp_index].drop_p.x = grid_global[y][x].x
+            item[temp_index].drop_p.y = grid_global[y][x].y
+            item_gasto(temp_index)
+
+            -- guardando informacao do inimigo
+            for j,w in ipairs(enemy_ref) do 
+              if enemy_ref[j].x == item[temp_index].drop_p.x and enemy_ref[j].y == item[temp_index].drop_p.y then
+                item[temp_index].drop_enemy_i = j
+              end
+            end
+            i_box_reset()
+            
+            -- bomb
+            if temp_index == 1 then
+              item[1].use = "active"
+              item[1].dura = item[1].dura_ref
+            end
+              
+          end
+        end
+      end 
     end
   end
 
@@ -636,13 +629,15 @@ end
 -- items 5 - makibishi
 if state.turn == "enemy" then
   for j,w in ipairs(enemy_ref) do
-    for p,u in ipairs(grid_global) do
-      if grid_global[p].item == item[5].name then
-        if enemy_ref[j].x == grid_global[p].x and enemy_ref[j].y == grid_global[p].y then
-          enemy_ref[j].life = enemy_ref[j].life - 1
-          en_stop_call = "on"
-          grid_global[p].ttype = "clear"
-          grid_global[p].item = 0
+    for y,v in ipairs(grid_global) do
+      for x,w in ipairs(grid_global[y]) do
+        if grid_global[y][x].item == item[5].name then
+          if enemy_ref[j].x == grid_global[y][x].x and enemy_ref[j].y == grid_global[y][x].y then
+            enemy_ref[j].life = enemy_ref[j].life - 1
+            en_stop_call = "on"
+            grid_global[y][x].ttype = "clear"
+            grid_global[y][x].item = 0
+          end
         end
       end
     end
@@ -651,11 +646,13 @@ end
 
 -- items 6 - smoke
 for j,w in ipairs(enemy_ref) do
-  for p,u in ipairs(grid_global) do
-    if grid_global[p].item == item[6].name then
-      if ma_he(enemy_ref[j],grid_global[p]) < 315 and move_ref_in == 0 and enemy_ref[j].comp ~= "dead" then
-        enemy_ref[j].comp = "confuse"
-        enemy_ref[j].alert_anim = 6
+  for y,v in ipairs(grid_global) do
+    for x,w in ipairs(grid_global[y]) do
+      if grid_global[y][x].item == item[6].name then
+        if ma_he(enemy_ref[j],grid_global[y][x]) < 315 and move_ref_in == 0 and enemy_ref[j].comp ~= "dead" then
+          enemy_ref[j].comp = "confuse"
+          enemy_ref[j].alert_anim = 6
+        end
       end
     end
   end
@@ -672,7 +669,7 @@ end -- end state.turn == "enemy"
 if item[6].dura == 0 then 
   emission_rate = emission_rate - 1
   if emission_rate > 0 then
-    p_neblina.p:setEmissionRate(emission_rate)
+    p_neblina.p:setEmissionRate(emission_rate)                                                              
   end
   if emission_rate <= 20 then 
     item[6].use = "off" 
@@ -681,9 +678,11 @@ if item[6].dura == 0 then
       enemy_ref[state.enemy.index_comp].comp = state.enemy.comp_random[love.math.random(1, 2)] -- escolha de comportamento
       enemy_ref[state.enemy.index_comp].change_comp = "off" -- interrompendo mudança de comportamento
     end -- global function - enemy_comp_coli 
-    for p,u in ipairs(grid_global) do
-      if grid_global[p].item == item[6].name then
-        grid_global[p].item = 0
+    for y,v in ipairs(grid_global) do
+      for x,w in ipairs(grid_global[y]) do
+        if grid_global[y][x].item == item[6].name then
+          grid_global[y][x].item = 0
+        end
       end
     end
   end

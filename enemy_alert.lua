@@ -20,7 +20,7 @@ function enemy_alert()
     end
     
     -- destrust player
-    if enemy_ref[i].comp == "alert_desconf" then
+    if enemy_ref[i].comp == "alert_desconf" or enemy_ref[i].comp == "alert_item" then
       p_desconf_player.p:start()
       
       love.graphics.setColor(1, 1, 1, 0.5)

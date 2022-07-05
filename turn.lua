@@ -190,7 +190,7 @@ end
 function turn_update()
 
   -- bt end turn - hover
-  if state.turn ~= "enemy" and love.mouse.getX() > 1115 and love.mouse.getX() < 1187 and love.mouse.getY() > 8 and love.mouse.getY() < 32 and state.move.key == "off" and state.range.path_end == "stop" then
+  if state.turn ~= "enemy" and love.mouse.getX() > 1115 and love.mouse.getX() < 1187 and love.mouse.getY() > 8 and love.mouse.getY() < 32  and state.range.path_end == "stop" then
   
     turn.bt_q_ctl = turn.bt_hover
     turn.bt_font = 0.5

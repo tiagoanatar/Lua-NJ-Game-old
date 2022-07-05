@@ -1,15 +1,11 @@
-
--- scaX = escala x (usado para inverção de sprite)
--- atNumb = Numero da animação usada para player
-
--- mous relase click
-local mouse_release = true
+-- scaX = invert sprite
+-- atNumb = Animation number used bt the player
 
 -- ///////////////////////////////////////////////////////////////
 --// FUNCTIONS
 --///////////////////////////////////////////////////////////////
 
--- 1 // movimento ///////////////////////////////////////////
+-- 1 // movement ///////////////////////////////////////////
 -- /////////////////////////////////////////////////////////
 
 local function play_mov()
@@ -21,59 +17,56 @@ local function play_mov()
     state.player.scaX = 1
   end
   
-  --local mouse_click_holder = false
-
-  -- mouse click control
-  if love.mouse.isDown(1) == false and state.range.path_end == "stop" and is_open_block() then
-    mouse_release = true
-  end
-  
   -- mouse move
-  if mouse_release == true and state.move.key == "off" and state.range.path_end == "stop" and state.turn == "move" then
+  if state.player.trigger_auto_move == false and state.turn == "move" then
     
     -- update all the time to get the index
-    mouse_action_box_update(state.player.m_box)
+    func:mouse_action_box_update(state.player.m_box)
       
   end
 
   -- PLAYER RESET - if reach destiny stop
-  if state.range.path_end == "on" and state.turn == "move" and state.range.fim.x == state.player.x and state.range.fim.y == state.player.y then 
+  if state.range.fim.x == state.player.x and state.range.fim.y == state.player.y then 
     state.range.path_end = "stop"
   end
 
   -- keys move
-  if key_l and state.move.ref_index == 0 and state.player.m_max > 0 and colisao_main(state.player,-45,0) ~= 1 and key_r == false 
-  and key_u == false and key_d == false and state.range.path_end == "stop" and state.move.key == "off" then
-    state.move.rand_h = 2 ; state.move.rand_v = 0
-    state.move.key = "on"
-  end 
+  if state.player.trigger_auto_move == false and state.player.m_max > 0 then 
+    
+    local function callRangePath()
+      state.player.trigger_auto_move = true
+      state.range.path_end = "off" -- GLOBAL
+      range_path_final(state.player)
+    end
+    
+    if key_l and colisao_main(state.player,-45,0) then
+      state.range.fim.x = state.player.x - 45 ; state.range.fim.y = state.player.y
+      callRangePath()
+    end 
 
-  if key_r and state.move.ref_index == 0 and state.player.m_max > 0 and colisao_main(state.player,45,0) ~= 1 and key_l == false 
-  and key_u == false and key_d == false and state.range.path_end == "stop" and state.move.key == "off" then
-    state.move.rand_h = 1 ; state.move.rand_v = 0
-    state.move.key = "on"
-  end  
+    if key_r and colisao_main(state.player,45,0) then
+      state.range.fim.x = state.player.x + 45 ; state.range.fim.y = state.player.y
+      callRangePath()
+    end  
 
-  if key_u and state.move.ref_index == 0 and state.player.m_max > 0 and colisao_main(state.player,0,-45) ~= 1 and key_l == false 
-  and key_r == false and key_d == false and state.range.path_end == "stop" and state.move.key == "off" then
-    state.move.rand_h = 0 ; state.move.rand_v = 1
-    state.move.key = "on"
+    if key_u and colisao_main(state.player,0,-45) then
+      state.range.fim.x = state.player.x ; state.range.fim.y = state.player.y - 45
+      callRangePath()
+    end
+
+    if key_d and colisao_main(state.player,0,45) then
+      state.range.fim.x = state.player.x ; state.range.fim.y = state.player.y + 45
+      callRangePath()
+    end  
+  
   end
 
-  if key_d and state.move.ref_index == 0 and state.player.m_max > 0 and colisao_main(state.player,0,45) ~= 1 and key_l == false 
-  and key_r == false and key_u == false and state.range.path_end == "stop" and state.move.key == "off" then
-    state.move.rand_h = 0 ; state.move.rand_v = 2
-    state.move.key = "on"
-  end  
-
   -- move function
-  if state.move.key == "on" or state.range.path_end == "on" then
-    if state.player.trigger_auto_move == true then
-      move_main(state.player)
-    else 
-      state.range.path_open = "interupt"
-      state.range.path_end = "stop" 
-    end
+  if state.player.trigger_auto_move == true then
+    move_main(state.player)
+  else 
+    state.range.path_open = "interupt"
+    state.range.path_end = "stop" 
   end
   
   -- reset auto move
@@ -96,38 +89,9 @@ local function play_ataque_draw()
 end 
 
 local function play_ataque_move()
-      
-  if key_l and key_r == false and key_u == false and key_d == false and atk_click == "off" 
-  and colisao_main(state.player.a_box,-45,0) == 1 then
-    a_box.x = a_box.x - 45
-    atk_click = "on"
-  end 
-  
-  if key_r and key_l == false and key_u == false and key_d == false and atk_click == "off" 
-  and colisao_main(state.player.a_box,45,0) == 1 then
-    a_box.x = a_box.x + 45
-    atk_click = "on"
-  end  
-  
-  if key_u and key_l == false and key_r == false and key_d == false and atk_click == "off" 
-  and colisao_main(state.player.a_box,0,-45) == 1 then
-    a_box.y = a_box.y - 45
-    atk_click = "on"
-  end
-  
-  if key_d and key_l == false and key_r == false and key_u == false and atk_click == "off" 
-  and colisao_main(state.player.a_box,0,45) == 1  then
-    a_box.y = a_box.y + 45
-    atk_click = "on"
-  end  
-      
-  -- liberando movimento
-  if key_l == false and key_r == false and key_u == false and key_d == false then 
-    atk_click = "off"
-  end
 
   -- mouse box move
-  mouse_action_box_update(state.player.a_box)
+  func:mouse_action_box_update(state.player.a_box)
 
   for i,v in ipairs(state.enemy.list) do
     if state.enemy.list[i].comp ~= "dead" and state.player.a_max_use > 0 and state.combat.screen == "off" then
@@ -198,10 +162,6 @@ function play_update(dt)
   end
 
   if state.turn ~= "off" and state.turn ~= "enemy" and state.range.path_end == "stop" then
-    --range calculation  
-    if state.move.ref_index == 0 and state.range.path_open == "free" then
-      state.range.path_open = "on"
-    end
     range_path_main(state.player)
   end
   

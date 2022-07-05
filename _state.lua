@@ -111,8 +111,6 @@ state = {
   -----
   move = {
     ref_index = 0,
-    active = "off",
-    key = "off",
     rand_h = 0, -- direcao movimento horizontal
     rand_v = 0 ,-- direcao movimento vertical
     rand_path_diago = 0 -- usado no movimento "path_diago" - escolhe sentido no movimento

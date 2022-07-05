@@ -51,13 +51,13 @@ local function range_open_grid(ttype)
         end
       end
       -- ITEM
-      if state.turn == "item" and ma_he(grid_global[y][x],ttype) <= (45 * ttype.i_max) then  
+      if state.turn == "item" and func:ma_he(grid_global[y][x],ttype) <= (45 * ttype.i_max) then  
         if grid_global[y][x].ttype == "clear" or grid_global[y][x].ttype == "enemy" or grid_global[y][x].ttype == "item" then
           tab_feed(y,x)
         end
       end
       -- ATTACK
-      if state.turn == "attack" and ma_he(grid_global[y][x],ttype) <= (45 * ttype.a_max) then  
+      if state.turn == "attack" and func:ma_he(grid_global[y][x],ttype) <= (45 * ttype.a_max) then  
         if grid_global[y][x].ttype == "clear" or grid_global[y][x].ttype == "enemy" or grid_global[y][x].ttype == "item" then
           tab_feed(y,x)
         end
@@ -138,7 +138,7 @@ function range_path_main(ttype)
   while finaliza_tudo == "off" and move_points > 0 do
 
     for j,w in ipairs(r.open) do
-      if ma_he(r.open[j],current) == 45 and r.open[current_index].m_po < move_points 
+      if func:ma_he(r.open[j],current) == 45 and r.open[current_index].m_po < move_points 
       and r.open[j].check == "off" then
         r.open[j].m_po = r.open[current_index].m_po + 1
         r.open[j].check = "close"
@@ -193,7 +193,7 @@ function range_path_final(ttype)
       for i,v in ipairs(copy) do
         if copy[i].check == "close" then
           found_l_tab.i[#found_l_tab.i + 1] = i
-          found_l_tab.v[#found_l_tab.v + 1] = ma_he(copy[i],state.player)
+          found_l_tab.v[#found_l_tab.v + 1] = func:ma_he(copy[i],state.player)
           found_l_tab.x[#found_l_tab.x + 1] = copy[i].x
           found_l_tab.y[#found_l_tab.y + 1] = copy[i].y
         end
@@ -229,7 +229,7 @@ function range_path_final(ttype)
         final_block_once = false
       end
         
-      if ma_he(copy[j],r.temp) == 45 and copy[j].final_check == "off" and copy[j].check == "close" then
+      if func:ma_he(copy[j],r.temp) == 45 and copy[j].final_check == "off" and copy[j].check == "close" then
         min_val_tab.i[#min_val_tab.i + 1] = j
         min_val_tab.v[#min_val_tab.v + 1] = copy[j].m_po
         copy[j].final_check = "on"
@@ -280,7 +280,7 @@ end
 function range_draw()
   
   for i,v in ipairs(r.open) do
-    if r.open[i].check == "close" then
+    if r.open[i].check == "close" and state.turn ~= 'off' then
       love.graphics.setColor(0,0,0,0.6)
       love.graphics.rectangle("fill", r.open[i].x, r.open[i].y, r.open[i].w, r.open[i].h)
 
@@ -293,7 +293,7 @@ function range_draw()
 
   -- path final tab
   for i,v in ipairs(r.path_final) do
-    love.graphics.setColor(0.5,0.4,0,0.8)
+    love.graphics.setColor(0.5,0.4,1,0.8)
     love.graphics.rectangle("fill", r.path_final[i].x, r.path_final[i].y, 45, 45)
   end
 

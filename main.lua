@@ -23,6 +23,7 @@ bresenham = require 'libs/bresenham'
 --///////////////////////////////////////////////////////////////
 
 require '_state'
+require '_functions'
 require '_assets_db'
 require '_strings_db'
 

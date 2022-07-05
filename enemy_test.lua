@@ -32,8 +32,6 @@ local function new_enem()
 
   v_ref = {x = 0, y = 0}, v_p_ref = {x = 0, y = 0}, -- mantem posicoes de referencia quando inimigo e player estao em movimento 0
 
-  loop_reset = true, -- reset view boxes
-
   -- move
   m_max = 0, m_max_base = 10,
 
@@ -117,7 +115,7 @@ local function rand_posi()
     local fim = "off"
     
     repeat
-      if grid_global[y][x].ttype == "clear" and ma_he(grid_global[y][x], state.player) > 270 then
+      if grid_global[y][x].ttype == "clear" and func:ma_he(grid_global[y][x], state.player) > 270 then
         fim = "on"
       else
         y = love.math.random(1, #grid_global)
@@ -164,13 +162,24 @@ end
 
 function enemy_a_update(dt)
 
--- update em acoes do inimigo
   for i,v in ipairs(enemy_ref) do 
     enemy_ref[i].anim_type[enemy_ref[i].main_anim]:update(dt)
     enemy_ref[i].alert_type[enemy_ref[i].alert_anim]:update(dt)
+    
+    -- activate alert anim
+    if enemy_ref[i].comp == "alert_player" then enemy_ref[i].alert_anim = 4
+    elseif enemy_ref[i].comp == "alert_body" then enemy_ref[i].alert_anim = 5
+    elseif enemy_ref[i].comp == "alert_desconf" then enemy_ref[i].alert_anim = 2
+    elseif enemy_ref[i].comp == "alert_item" then enemy_ref[i].alert_anim = 2 
+    elseif enemy_ref[i].comp == "confuse" then enemy_ref[i].alert_anim = 6
+    -- deactivate marker
+    else 
+      enemy_ref[i].alert_anim = 1 
+    end
+    
+    -- vision update
+    enemy_vision_update(dt, i) 
   end
-
-  enemy_vision_update(dt) 
 
 -- comportamento do inimigo
   if state.turn == "enemy" then enemy_comp() end
@@ -190,7 +199,6 @@ function enemy_a_draw()
     love.graphics.setColor(1,1,1,1)
     enemy_ref[i].anim_type[enemy_ref[i].main_anim]:draw(enemy_ref[i].sprite, enemy_ref[i].x +20, enemy_ref[i].y +20, 0,  enemy_ref[i].scaX, 1, 44, 30) -- 44 e 30 são o ponto de origem
     
-
     -- hit box
     --love.graphics.setColor(1,0,0,0.3) 
     --love.graphics.rectangle("fill", enemy_ref[i].x, enemy_ref[i].y, enemy_ref[i].w, enemy_ref[i].h)
@@ -241,11 +249,11 @@ function enemy_life_bar()
         and wm.x < enemy_ref[i].x + m_size_tile
         and wm.y >= enemy_ref[i].y 
         and wm.y < enemy_ref[i].y + m_size_tile then
-            lifebar_calc(i)
-            love.graphics.setColor(0, 0, 0, 1)
-            love.graphics.rectangle("fill", enemy_ref[i].x, enemy_ref[i].y+40, 45, 5)
-            love.graphics.setColor(0.4, 0.9, 0.9, 0.7)
-            love.graphics.rectangle("fill", enemy_ref[i].x, enemy_ref[i].y+40, enemy_ref[i].life_bar_hover, 5)
+          lifebar_calc(i)
+          love.graphics.setColor(0, 0, 0, 1)
+          love.graphics.rectangle("fill", enemy_ref[i].x, enemy_ref[i].y+40, 45, 5)
+          love.graphics.setColor(0.4, 0.9, 0.9, 0.7)
+          love.graphics.rectangle("fill", enemy_ref[i].x, enemy_ref[i].y+40, enemy_ref[i].life_bar_hover, 5)
         end
     end
     
