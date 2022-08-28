@@ -39,15 +39,14 @@ function func:mouse_action_box_update(box)
       found = true
       
       --
-      if state.turn == "move" then
+      if state.turn.current == state.turn.ttype.move then
         state.range.fim.x = box.x
         state.range.fim.y = box.y
-        state.range.path_end = "off" -- GLOBAL
         range_path_final(state.player)
       end
       --
       
-      if love.mouse.isDown(1) and state.turn == "move" then
+      if love.mouse.isDown(1) and state.turn.current == state.turn.ttype.move then
         state.player.trigger_auto_move = true
       end
     end

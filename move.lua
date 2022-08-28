@@ -31,9 +31,9 @@ function move_path(ttype)
     -- left
     if state.range.path_final[i].x == x - 45 and state.range.path_final[i].y == y then
       state.move.rand_h = 'left' ; state.move.rand_v = '' ; save_index = i
-      ttype.scaX = -1 -- direcao do sprite 
+      ttype.scaX = -1 
       -- enemy turn to player - zero move
-      if func:ma_he(state.player,enemy_ref[state.enemy.index_comp]) == 45 and state.player.x < enemy_ref[state.enemy.index_comp].x and state.turn == "enemy" then
+      if func:ma_he(state.player,enemy_ref[state.enemy.index_comp]) == 45 and state.player.x < enemy_ref[state.enemy.index_comp].x and state.turn.current == state.turn.ttype.enemy then
         move_max_zero(state.enemy.index_comp)
       end
     end
@@ -41,9 +41,9 @@ function move_path(ttype)
     -- right
     if state.range.path_final[i].x == x + 45 and state.range.path_final[i].y == y then
       state.move.rand_h = 'right' ; state.move.rand_v = '' ; save_index = i
-      ttype.scaX = 1 -- direcao do sprite
+      ttype.scaX = 1
       -- enemy turn to player - zero move
-      if func:ma_he(state.player,enemy_ref[state.enemy.index_comp]) == 45 and state.player.x > enemy_ref[state.enemy.index_comp].x and state.turn == "enemy" then
+      if func:ma_he(state.player,enemy_ref[state.enemy.index_comp]) == 45 and state.player.x > enemy_ref[state.enemy.index_comp].x and state.turn.current == state.turn.ttype.enemy then
         move_max_zero(state.enemy.index_comp)
       end
     end
@@ -66,12 +66,12 @@ end
 function move_main(ttype)
   
   -- auto move - path
-  if state.move.ref_index == 0 and state.range.path_end == "on" then
-    move_path(ttype) 
+  if state.move.ref_index == 0 then
+    move_path(ttype)
   end
 
   -- key move - manual
-  if ttype.m_max > 0 and state.move.ref_index < 45 and state.player.trigger_auto_move then
+  if ttype.m_max > 0 and state.move.ref_index < 45 then --- AQUI state.player.trigger_auto_move
       
     if state.move.rand_h == 'right' then ttype.x = ttype.x + 4.5 end
     if state.move.rand_h == 'left' then ttype.x = ttype.x - 4.5 end
@@ -87,12 +87,11 @@ function move_main(ttype)
   if state.move.ref_index == 45 then
     state.move.ref_index = 0
     state.move.rand_h = '' ; state.move.rand_v = ''
-    state.range.path_open = "on"
-    if state.turn == "move" then
+    if state.turn.current == state.turn.ttype.move then
       ttype.m_max = ttype.m_max - 1
     end
-    if state.turn == "enemy" then
-      ttype.m_max = ttype.m_max - 3 
+    if state.turn.current == state.turn.ttype.enemy then
+      ttype.m_max = ttype.m_max - 6 
     end
   end
   
@@ -102,12 +101,9 @@ function move_main(ttype)
   end
 
   -- ENEMY
-  if state.turn == "enemy" then
+  if state.turn.current == state.turn.ttype.enemy then
     if state.range.fim.x == ttype.x and state.range.fim.y == ttype.y then
       ttype.m_max = 0
-    end
-    if state.enemy.alert_p == "on" and func:ma_he(ttype,state.player) == 45 then 
-      state.range.path_open = "on"
     end
     if ttype.m_max < 0 then
       ttype.m_max = 0

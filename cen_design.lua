@@ -338,7 +338,7 @@ player_draw()
   
 end
 -- dark move
-if state.turn ~= "enemy" then 
+if state.turn.current ~= state.turn.ttype.enemy then 
     range_draw()
 end
 --

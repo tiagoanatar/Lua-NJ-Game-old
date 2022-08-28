@@ -143,7 +143,7 @@ function love.update(dt)
     turn_update()
 
     -- call atck function
-    if state.turn == "attack" or state.turn == "item" then
+    if state.turn.current == state.turn.ttype.attack or state.turn.current == state.turn.ttype.item then
       combate_update()
     end
 

@@ -2,11 +2,24 @@
 state = {
   
   -- save game data
+  -----
   save = {},
   
-  -- general
+  -- turn
   -----
-  turn = 'off', -- atack, move, item, skill, off, turning_off(will start turn deactivation), enemy
+  turn = {
+    current = 'off',
+    ttype = { 
+      move = "move", item = "item", attack = "attack", enemy = "enemy", 
+      skill = "skill", turning_off = "turning_off", off = "off"
+    }
+  },
+          
+  -- item
+  -----
+  item = {
+    use = false -- will trigger the panel do not display
+  },
   
   -- player list
   -----
@@ -98,12 +111,10 @@ state = {
   -- range
   -----
   range = {
-    path_open = "on", -- on, off, interrupt, free
     open = {},
     fim = {x =0, y = 0},
     temp = {x =0, y = 0},
     path_final = {},
-    path_end = "stop", -- stop, on, off
     range_path_main = range_path_main
   },
   
@@ -113,7 +124,8 @@ state = {
     ref_index = 0,
     rand_h = 0, -- direcao movimento horizontal
     rand_v = 0 ,-- direcao movimento vertical
-    rand_path_diago = 0 -- usado no movimento "path_diago" - escolhe sentido no movimento
+    rand_path_diago = 0, -- usado no movimento "path_diago" - escolhe sentido no movimento
+    auto_move = false
   },
   
   -- cenario

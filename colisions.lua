@@ -25,7 +25,7 @@ function grid_global_update()
         end 
       end
       
-      if state.turn == "enemy" and enemy_ref[state.enemy.index_comp].x == grid_global[y][x].x and enemy_ref[state.enemy.index_comp].y == grid_global[y][x].y and enemy_ref[state.enemy.index_comp].comp ~= "dead" then 
+      if state.turn.current == state.turn.ttype.enemy and enemy_ref[state.enemy.index_comp].x == grid_global[y][x].x and enemy_ref[state.enemy.index_comp].y == grid_global[y][x].y and enemy_ref[state.enemy.index_comp].comp ~= "dead" then 
         grid_global[y][x].ttype = "clear" 
       end 
         

@@ -29,7 +29,7 @@ local enemy
 local function combate_colisoes() 
   
   -- activate screen - item
-  if state.turn == 'item' then
+  if state.turn.current == state.turn.ttype.item then
     if state.combat.item_active == 'on' and state.combat.screen == 'off' then
       state.combat.screen = 'on'
       damage_once = 'on'
@@ -37,7 +37,7 @@ local function combate_colisoes()
   end
     
   -- activate screen - enemy
-  if state.turn == 'enemy' then
+  if state.turn.current == state.turn.ttype.enemy then
     if state.combat.enemy_active == 'on' and state.combat.screen == 'off' then
       state.combat.enemy_index = state.enemy.index_comp
       enemy = enemy_ref[state.combat.enemy_index]
@@ -47,7 +47,7 @@ local function combate_colisoes()
   end
 
   -- activate screen - player
-  if state.turn == 'attack' then 
+  if state.turn.current == state.turn.ttype.attack then 
     if state.combat.atack_active == 'on' and state.combat.screen == 'off' then
       enemy = enemy_ref[state.combat.enemy_index]
       state.combat.screen = 'on'
@@ -262,19 +262,19 @@ local function combate_animacoes()
     end
 
     -- resetando ataque do inimigo
-    if state.turn == 'enemy' then
+    if state.turn.current == state.turn.ttype.enemy then
       state.combat.enemy_active = 'off'
       state.combat.screen = 'off'
     end
 
     -- resetando ataque do item
-    if state.turn == 'item' then
+    if state.turn.current == state.turn.ttype.item then
       state.combat.item_active = 'off'
       state.combat.screen = 'off'
     end
 
     -- resetando ataque do player
-    if state.turn == 'attack' then
+    if state.turn == state.turn.ttype.attack then
       state.combat.atack_active = 'off'
       state.combat.screen = 'off'
     end

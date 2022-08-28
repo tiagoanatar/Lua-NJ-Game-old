@@ -1,14 +1,14 @@
 local current = {x = 0, y = 0} -- current position
 local index_tab = {} -- save indexes will be used
 local move_points, current_index = 0, 0 -- move points, current index
-local finaliza_tudo = "on" -- finalization var
+local end_main_loop = "on" -- finalization var
 
 -- global ref
 local r = state.range
 
 local function tab_add()
   return {
-    check = "off", -- off(never checked), open(can be checked), close(alredy checked)
+    check = "off", -- off(never checked), close(alredy checked)
     x = 0, y = 0, w = 45, h = 45, m_po = 0, final_check = "off"
   }
 end
@@ -45,25 +45,28 @@ local function range_open_grid(ttype)
     for x,w in ipairs(grid_global[y]) do
       
       -- MOVE
-      if state.turn == "move" then
+      if state.turn.current == state.turn.ttype.move then
         if grid_global[y][x].ttype == "clear" or grid_global[y][x].ttype == "item" then
           tab_feed(y,x)
         end
       end
+      
       -- ITEM
-      if state.turn == "item" and func:ma_he(grid_global[y][x],ttype) <= (45 * ttype.i_max) then  
+      if state.turn.current == state.turn.ttype.item and func:ma_he(grid_global[y][x],ttype) <= (45 * ttype.i_max) then  
         if grid_global[y][x].ttype == "clear" or grid_global[y][x].ttype == "enemy" or grid_global[y][x].ttype == "item" then
           tab_feed(y,x)
         end
       end
+      
       -- ATTACK
-      if state.turn == "attack" and func:ma_he(grid_global[y][x],ttype) <= (45 * ttype.a_max) then  
+      if state.turn.current == state.turn.ttype.attack and func:ma_he(grid_global[y][x],ttype) <= (45 * ttype.a_max) then  
         if grid_global[y][x].ttype == "clear" or grid_global[y][x].ttype == "enemy" or grid_global[y][x].ttype == "item" then
           tab_feed(y,x)
         end
       end
+      
       -- ENEMY
-      if state.turn == "enemy" then  
+      if state.turn.current == state.turn.ttype.enemy then  
         if grid_global[y][x].ttype == "clear" or grid_global[y][x].ttype == "item" then
           tab_feed(y,x)
         end
@@ -88,29 +91,25 @@ end
 
 local function start_setup(ttype)
 
--- start point
+  -- start point
   current.x = ttype.x
   current.y = ttype.y
 
--- table feed
+  -- table feed
   range_open_grid(ttype)
-
--- end final setup
-  r.path_open = "off"
   
--- equals range to current move points of hero
-  if state.turn == "move" then
+  -- equals range to current move points of hero
+  if state.turn.current == state.turn.ttype.move then
     move_points = ttype.m_max
-  elseif state.turn == "item" then
+  elseif state.turn.current == state.turn.ttype.item then
     move_points = ttype.i_max
-  elseif state.turn == "attack" then
+  elseif state.turn.current == state.turn.ttype.attack then
     move_points = ttype.a_max
-  elseif state.turn == "enemy" then
+  elseif state.turn.current == state.turn.ttype.enemy then
     move_points = ttype.m_max
   end
     
--- deactivate this routine
-  finaliza_tudo = "off"
+  end_main_loop = "off"
 
 end
 
@@ -118,24 +117,13 @@ end
 --// MAIN STRUCTURE
 --///////////////////////////////////////////////////////////////
 
-function range_path_main(ttype) 
+function range_path_main(ttype)
 
--- controler - check turnos.lua
-  if r.path_open == "interupt" then r.path_open = "on" end
-
--- start setup
--- PLAYER
-  if state.turn ~= "enemy" and r.path_open == "on" and state.move.ref_index == 0 then 
-    start_setup(ttype)
-  end
-
--- ENEMY
-  if state.turn == "enemy" then
-    start_setup(ttype)
-  end
+  -- start setup
+  start_setup(ttype)
 
   -- main loop
-  while finaliza_tudo == "off" and move_points > 0 do
+  while end_main_loop == "off" and move_points > 0 do
 
     for j,w in ipairs(r.open) do
       if func:ma_he(r.open[j],current) == 45 and r.open[current_index].m_po < move_points 
@@ -152,7 +140,7 @@ function range_path_main(ttype)
       table.remove(index_tab, #index_tab)
     end
 
-    if #index_tab == 0 then finaliza_tudo = "on" end
+    if #index_tab == 0 then end_main_loop = "on" end
 
   end
 
@@ -167,7 +155,7 @@ function range_path_final(ttype)
   local final_block_once = true
   local found_location = false
 
-  local t_i = 0 -- current check tablales index
+  local t_i = 0 -- current check table index
   local min_val_tab = {i={},v={}}
   local found_l_tab = {i={},v={},x={},y={}}
   
@@ -178,13 +166,11 @@ function range_path_final(ttype)
   r.temp.y = r.fim.y
 
 -- ENEMY ONLY - in case target is outside the range_open
-  if state.turn == "enemy" then
+  if state.turn.current == state.turn.ttype.enemy then
       
-    if found_location == false then
-      for j,w in ipairs(copy) do
-        if r.temp.x == copy[j].x and r.temp.y == copy[j].y and copy[j].check == "close" then
-          found_location = true
-        end
+    for j,w in ipairs(copy) do
+      if r.temp.x == copy[j].x and r.temp.y == copy[j].y and copy[j].check == "close" then
+        found_location = true
       end
     end
         
@@ -266,10 +252,6 @@ function range_path_final(ttype)
     end
   
   end -- END WHILE
-
-  if r.temp.x == ttype.x and r.temp.y == ttype.y then
-    r.path_end = "on"
-  end
   
 end
 
@@ -280,7 +262,7 @@ end
 function range_draw()
   
   for i,v in ipairs(r.open) do
-    if r.open[i].check == "close" and state.turn ~= 'off' then
+    if r.open[i].check == "close" and state.turn.current ~= state.turn.ttype.off then
       love.graphics.setColor(0,0,0,0.6)
       love.graphics.rectangle("fill", r.open[i].x, r.open[i].y, r.open[i].w, r.open[i].h)
 

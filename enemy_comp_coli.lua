@@ -38,7 +38,7 @@ end
 local function index_comp_reset()
 
   if state.enemy.index_comp > #state.enemy.list then
-    state.turn = "move"
+    state.turn.current = state.turn.ttype.move
     state.enemy.index_comp = 1
     enen_cont_reset() -- limpa contador
 
@@ -158,9 +158,6 @@ local function dire_diago_path()
   -- alimentando posicao escolhida
     state.range.fim.x = enemy_ref.x
     state.range.fim.y = enemy_ref.y
-print(1)
-  -- acabado o for desativa toda essa area
-    state.range.path_end = "off"
       
     return
   end
@@ -174,8 +171,6 @@ print(1)
     state.range.fim.x = tab[random_pos].x
     state.range.fim.y = tab[random_pos].y
 
-  -- acabado o for desativa toda essa area
-    state.range.path_end = "off"
     tab = nil
   end
 
@@ -187,9 +182,6 @@ local function alert_path(ttype)
   range_path_main(enemy_ref)
 
   state.range.fim.x = ttype.x  ; state.range.fim.y = ttype.y
-  
--- turn off
-  state.range.path_end = "off"
   
 end
 
@@ -220,9 +212,6 @@ local function setup_final()
   end
 
   if state.combat.enemy_active == "off" then
-    -- desativa o path
-    state.range.path_end = "stop" 
-
     -- change enemy
     state.enemy.index_comp = state.enemy.index_comp + 1
     
@@ -251,21 +240,17 @@ local function comp_stop()
 
 end
 
--- 2 - comp - path_diago
+-- 2 - comp - move chosing 1 of the 4 regions of the map
 local function comp_path_diago()
 
   -- setup inicial
-  -- ativa e desativa variaveis locais -- executado 1 vez por inimigo
   if local_var == "on" then
   -- random direction
     state.move.rand_path_diago = love.math.random(1, 4)
     setup_inicial()
   end
-
-  -- so ativa somente quando o path find acabar suas opearacoes
-  if state.range.path_end == "on" then -- GLOBAL
-    enem_move() -- movimento
-  end 
+  
+  enem_move() -- movimento
 
   -- finalizacao do movimento
   if enemy_ref.m_max == 0 then
@@ -312,23 +297,12 @@ local function alert_descon()
   -- ativa e desativa variaveis locais -- executado 1 vez por inimigo
   if local_var == "on" then
     setup_inicial()
-  end
-
-  -- escolhendo a direcao
-  if state.range.path_end == "stop" then -- GLOBAL
     alert_path(state.player)
-  end
-
-  -- ativa path find
-  if state.range.path_end == "off" then -- GLOBAL
     range_path_final(enemy_ref)
   end
 
-  -- so ativa somente quando o path find acabar suas opearacoes
-  if state.range.path_end == "on" then -- GLOBAL
-    muda_dire(false) -- vira inimigo em direcao ao heroi
-    enem_move() -- movimento
-  end 
+  muda_dire(false) -- vira inimigo em direcao ao heroi
+  enem_move() -- movimento
 
   -- finalizacao do movimento
   if enemy_ref.m_max == 0 then
@@ -341,13 +315,9 @@ end
 local function alert_player()
 
   -- setup inicial
-  -- ativa e desativa variaveis locais -- executado 1 vez por inimigo
   if local_var == "on" then
     setup_inicial()
-  end
-
-  -- escolhendo a direcao
-  if state.range.path_end == "stop" then -- GLOBAL
+    
     if enemy_ref.comp == "alert_body" then
       alert_path(state.enemy.vision.dead)
     elseif enemy_ref.comp == "alert_item" then
@@ -355,23 +325,15 @@ local function alert_player()
     elseif enemy_ref.comp == 'alert_player' then
       alert_path(state.player)
     end
-  end
 
-  -- ativa path find
-  if state.range.path_end == "off" then -- GLOBAL
     range_path_final(enemy_ref)
   end
 
-  -- so ativa somente quando o path find acabar suas opearacoes
-  if state.range.path_end == "on" then
+  if enemy_ref.comp ~= "alert_body" then
+    muda_dire(false) 
+  end
 
-    if enemy_ref.comp ~= "alert_body" then
-      muda_dire(false) 
-    end
-
-    enem_move() -- movimento
-
-  end 
+  enem_move() -- movimento
  
   -- finalizacao do movimento
   if enemy_ref.m_max == 0 then

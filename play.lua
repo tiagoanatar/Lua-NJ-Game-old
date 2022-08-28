@@ -17,61 +17,50 @@ local function play_mov()
     state.player.scaX = 1
   end
   
-  -- mouse move
-  if state.player.trigger_auto_move == false and state.turn == "move" then
-    
-    -- update all the time to get the index
+  -- mouse move -- update all the time to get the index
+  if state.player.trigger_auto_move == false then
     func:mouse_action_box_update(state.player.m_box)
-      
-  end
-
-  -- PLAYER RESET - if reach destiny stop
-  if state.range.fim.x == state.player.x and state.range.fim.y == state.player.y then 
-    state.range.path_end = "stop"
   end
 
   -- keys move
   if state.player.trigger_auto_move == false and state.player.m_max > 0 then 
     
-    local function callRangePath()
+    local function feedPosition(x, y)
+      for i, v in ipairs(state.range.path_final) do state.range.path_final[i] = nil end
+      table.insert(state.range.path_final, {x = 0, y = 0})
+      
+      -- intial position
+      state.range.path_final[1].x = state.player.x + x
+      state.range.path_final[1].y = state.player.y + y
+      
+      -- final position
+      state.range.fim.x = state.player.x + x
+      state.range.fim.y = state.player.y + y
+      
       state.player.trigger_auto_move = true
-      state.range.path_end = "off" -- GLOBAL
-      range_path_final(state.player)
     end
     
     if key_l and colisao_main(state.player,-45,0) then
-      state.range.fim.x = state.player.x - 45 ; state.range.fim.y = state.player.y
-      callRangePath()
+      feedPosition(-45, 0)
     end 
 
     if key_r and colisao_main(state.player,45,0) then
-      state.range.fim.x = state.player.x + 45 ; state.range.fim.y = state.player.y
-      callRangePath()
+      feedPosition(45, 0)
     end  
 
     if key_u and colisao_main(state.player,0,-45) then
-      state.range.fim.x = state.player.x ; state.range.fim.y = state.player.y - 45
-      callRangePath()
+      feedPosition(0, -45)
     end
 
     if key_d and colisao_main(state.player,0,45) then
-      state.range.fim.x = state.player.x ; state.range.fim.y = state.player.y + 45
-      callRangePath()
+      feedPosition(0, 45)
     end  
   
   end
 
-  -- move function
+  -- GLOBAL move function
   if state.player.trigger_auto_move == true then
     move_main(state.player)
-  else 
-    state.range.path_open = "interupt"
-    state.range.path_end = "stop" 
-  end
-  
-  -- reset auto move
-  if state.player.m_max == 0 then
-    state.player.trigger_auto_move = false
   end
 
 end
@@ -143,12 +132,12 @@ end
 function play_update(dt)
 
   -- item reset
-  if state.turn ~= "item" then
+  if state.turn.current ~= state.turn.ttype.item then
     items_reset()
   end
 
   -- item update
-  if state.turn == "item" then
+  if state.turn.current == state.turn.ttype.item then
     items_use()
   end
 
@@ -156,12 +145,12 @@ function play_update(dt)
   items_enemy_effect()  
 
   -- attack box update
-  if state.turn ~= "attack" then
+  if state.turn.current ~= state.turn.ttype.attack then
     state.player.a_box.x = state.player.x
     state.player.a_box.y = state.player.y
   end
 
-  if state.turn ~= "off" and state.turn ~= "enemy" and state.range.path_end == "stop" then
+  if state.turn.current ~= state.turn.ttype.off and state.turn.current ~= state.turn.ttype.enemy and state.player.trigger_auto_move == false then
     range_path_main(state.player)
   end
   
@@ -174,7 +163,7 @@ function play_update(dt)
   
   -- #01 - movimento + anim andando
   -----
-  if state.turn == "move" then
+  if state.turn.current == state.turn.ttype.move then
     play_mov() -- movimento
     state.player.atNumb = 3
     if state.move.ref_index > 0 then
@@ -183,7 +172,7 @@ function play_update(dt)
   end
 
   -- #02 - anim ataque
-  if state.turn == "attack" then
+  if state.turn.current == state.turn.ttype.attack then
     play_ataque_move() -- atacar movimento
     if state.combat.screen == "on" then
       --state.player.atNumb = 2
@@ -198,7 +187,7 @@ function play_update(dt)
   end
 
   -- #03 -anim parado
-  if state.turn == "off" or state.turn == "enemy" then
+  if state.turn.current == state.turn.ttype.off or state.turn.current == state.turn.ttype.enemy then
     state.player.atNumb = 1
     anim_type[1]:update(dt)
   end
@@ -230,12 +219,12 @@ for i,v in ipairs(grid_global) do
 end]]--
 
   -- atacar
-  if state.turn == "attack" then
+  if state.turn.current == state.turn.ttype.attack then
     play_ataque_draw()
   end
 
   -- move box
-  if state.turn == "move" then
+  if state.turn.current == state.turn.ttype.move then
     love.graphics.setColor(1, 0.5, 0.1, 1)
     love.graphics.rectangle("fill", state.player.m_box.x, state.player.m_box.y, state.player.m_box.w, state.player.m_box.h)
   end
@@ -254,16 +243,16 @@ function play_ui()
 
 -- sub tela - tecnicas ou item
   love.graphics.setColor(1, 1, 1, 1)
-  if state.turn == "skill" or state.turn == "item" and item_use == "off" then
+  if state.turn.current == state.turn.ttype.skill or state.turn.current == state.turn.ttype.item and state.item.use == false then
     love.graphics.draw(asset.ui.sub_screen_01, sub_tela_x, sub_tela_y, 0, 1, 1)
 
     -- items
-    if state.turn == "item" then
+    if state.turn.current == state.turn.ttype.item then
       items_draw_menu()
     end
 
     -- skill
-    if state.turn == "skill" then
+    if state.turn.current == state.turn.ttype.skill then
     
     end
 
@@ -323,10 +312,9 @@ function play_ui()
   love.graphics.setColor(1, 1, 1, 1) -- normalizador de cor
   love.graphics.setFont(asset.fonts.f1)
   love.graphics.print("alep:" .. state.enemy.alert_p_time, camera.x + 20, camera.y + 80, 0, 1, 1)
-  love.graphics.print("turno:" .. state.turn, camera.x + 120, camera.y + 80, 0, 1, 1)
+  love.graphics.print("turno:" .. state.turn.current, camera.x + 120, camera.y + 80, 0, 1, 1)
 
   love.graphics.print("max move:" .. state.player.m_max, camera.x + 20, camera.y + 120, 0, 1, 1)
-  love.graphics.print("path_end:" .. state.range.path_end, camera.x + 20, camera.y + 140, 0, 1, 1)
   love.graphics.print("state.move.ref_index:" .. state.move.ref_index, camera.x + 20, camera.y + 160, 0, 1, 1)
 
   --love.graphics.print("smoke use:" .. item[6].use, camera.x + 20, camera.y + 200, 0, 1, 1)

@@ -88,14 +88,14 @@ function turn_draw()
     love.graphics.setColor(1, 1, 1, 1)
   
     -- deactivate in case of zero
-    if state.turn ~= "enemy" and state.combat.screen == 'off' then
+    if state.turn.current ~= state.turn.ttype.enemy and state.combat.screen == 'off' then
       if state.player.m_max == 0 and turn[i].name == "Move" then love.graphics.setColor(1, 1, 1, 0.3) end
       if state.player.a_max_use == 0 and turn[i].name == "Attack" then love.graphics.setColor(1, 1, 1, 0.3) end
       if state.player.i_max_use == 0 and turn[i].name == "Item" then love.graphics.setColor(1, 1, 1, 0.3) end
     end
 
     -- darken options in case of enemy turn
-    if state.turn == "enemy" or state.combat.screen ~= 'off' then
+    if state.turn.current == state.turn.ttype.enemy or state.combat.screen ~= 'off' then
       love.graphics.setColor(1, 1, 1, 0.3) -- normalizador de cor 
     end
     
@@ -115,7 +115,7 @@ function turn_draw()
 
     -- mouse over -- check if hit button
     if wm.x >= turn[i].x and wm.x < turn[i].x + turn.size.w and wm.y >= turn[i].y and wm.y < turn[i].y + turn.size.h
-    and state.turn ~= "enemy" and state.combat.screen == 'off' then
+    and state.turn.current ~= state.turn.ttype.enemy and state.combat.screen == 'off' then
     
       -- change animation
       turn[i].q_ctl = 2
@@ -131,50 +131,42 @@ function turn_draw()
     
       -- attack
       if i == 1 and love.mouse.isDown(1) and state.player.a_max_use > 0 then
-        state.turn = "attack"
+        state.turn.current = state.turn.ttype.attack
         atk_box_pos = "on" 
-        state.range.path_open = "interupt"
       end
       -- move
       if i == 2 and love.mouse.isDown(1) and state.player.m_max > 0 then
-        state.turn = "move"
-        state.range.path_open = "interupt"
+        state.turn.current = state.turn.ttype.move
       end
       -- item
       if i == 3 and love.mouse.isDown(1) and state.player.i_max_use > 0 then
-        state.turn = "item"
-        state.range.path_open = "interupt"
+        state.turn.current = state.turn.ttype.item
         items_reset() -- permite que a tela de items seja ativida de novo mesmo que vc ja esteja no turno item
       end
       -- skill
       if i == 4 and love.mouse.isDown(1) and state.player.s_max_use > 0 then
-        state.turn = "skill"
-        state.range.path_open = "interupt"
+        state.turn.current = state.turn.ttype.skill
       end
     else
       turn[i].q_ctl = 1
     end
 
     -- keyboard short cuts
-    if state.turn ~= "enemy" and state.combat.screen == 'off' then
+    if state.turn.current ~= state.turn.ttype.enemy and state.combat.screen == 'off' then
     
       if love.keyboard.isDown("a") and state.player.a_max_use > 0 then
-        state.turn = "attack"
+        state.turn.current = state.turn.ttype.attack
         atk_box_pos = "on" 
-        state.range.path_open = "interupt"
       end
       if love.keyboard.isDown("m") and state.player.m_max > 0 then
-        state.turn = "move"
-        state.range.path_open = "interupt"
+        state.turn.current = state.turn.ttype.move
       end
       if love.keyboard.isDown("i") and state.player.i_max_use > 0 then
-        state.turn = "item"
-        state.range.path_open = "interupt"
+        state.turn.current = state.turn.ttype.item
         items_reset() -- allow item screen to be reactivated
       end
       if love.keyboard.isDown("s") then
-        state.turn = "skill"
-        state.range.path_open = "interupt"
+        state.turn.current = state.turn.ttype.skill
       end
     
     end
@@ -190,14 +182,13 @@ end
 function turn_update()
 
   -- bt end turn - hover
-  if state.turn ~= "enemy" and love.mouse.getX() > 1115 and love.mouse.getX() < 1187 and love.mouse.getY() > 8 and love.mouse.getY() < 32  and state.range.path_end == "stop" then
+  if state.turn.current ~= state.turn.ttype.enemy and love.mouse.getX() > 1115 and love.mouse.getX() < 1187 and love.mouse.getY() > 8 and love.mouse.getY() < 32  then
   
     turn.bt_q_ctl = turn.bt_hover
     turn.bt_font = 0.5
-    state.range.path_open = "interupt"
     
     if love.mouse.isDown(1) or love.keyboard.isDown("i") then
-      state.turn = "enemy"
+      state.turn.current = state.turn.ttype.enemy
     end
     
   else
@@ -207,36 +198,35 @@ function turn_update()
 
   -- turn off
   if love.mouse.isDown(2) or love.keyboard.isDown("escape") then
-    state.turn = "turning_off"
+    state.turn.current = state.turn.ttype.turning_off
   end
 
-  if state.turn == "skill" then
+  if state.turn.current == state.turn.ttype.skill then
     turn.bt_q_ctl = turn.bt_hover
     turn.bt_font = 0
   end
 
   -- deactivate in case uses are zero
-  if state.player.m_max == 0 and state.turn == "move" then
-    state.turn = "turning_off" 
-    state.range.path_end = "stop"
+  if state.player.m_max == 0 and state.turn.current == state.turn.ttype.move then
+    state.turn.current = state.turn.ttype.turning_off
   end
-  --[[if state.player.a_max_use == 0 and state.turn == "attack" then
-    state.turn = "turning_off" 
+  --[[if state.player.a_max_use == 0 and state.turn.current == "attack" then
+    state.turn.current = "turning_off" 
   end
-  if state.player.i_max_use == 0 and state.turn == "item" then
-    state.turn = "turning_off" 
+  if state.player.i_max_use == 0 and state.turn.current == "item" then
+    state.turn.current = "turning_off" 
   end]]
 
   -- reset values
-  if state.turn == "enemy" then
+  if state.turn.current == state.turn.ttype.enemy then
     state.player.m_max = state.player.m_max_new
     state.player.a_max_use = state.player.a_max_use_new
     state.player.i_max_use = state.player.i_max_use_new
   end
 
   -- deactivate turn
-  if state.turn == "turning_off" then
-    state.turn = "off"
+  if state.turn.current == state.turn.ttype.turning_off then
+    state.turn.current = state.turn.ttype.off
   end
 
 end

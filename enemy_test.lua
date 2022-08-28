@@ -33,7 +33,7 @@ local function new_enem()
   v_ref = {x = 0, y = 0}, v_p_ref = {x = 0, y = 0}, -- mantem posicoes de referencia quando inimigo e player estao em movimento 0
 
   -- move
-  m_max = 0, m_max_base = 10,
+  m_max = 0, m_max_base = 40,
 
   -- life bar 
   life_dano_ref = 0, life_bar = 80, life_bar_after = 80, life_bar_hover = 0,
@@ -182,7 +182,7 @@ function enemy_a_update(dt)
   end
 
 -- comportamento do inimigo
-  if state.turn == "enemy" then enemy_comp() end
+  if state.turn.current == state.turn.ttype.enemy then enemy_comp() end
   
 end
 
@@ -234,7 +234,7 @@ function enemy_a_draw()
 --
 
 -- enemy count
-  if state.turn == "enemy" then enen_cont_draw() end 
+  if state.turn.current == state.turn.ttype.enemy then enen_cont_draw() end 
 
 end -- END ENEMY DRAW
 

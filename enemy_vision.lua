@@ -27,7 +27,7 @@ end
 
 local function choose_path(tipo,ene_index)
 
-  local tab = {i={},v={}} -- first: table index, second: table value
+  local tab = {i={},v={}} -- first: index, second: value
   local result = 0
 
   local function table_feed(td,index) -- feed table with new indexes
@@ -35,8 +35,8 @@ local function choose_path(tipo,ene_index)
     td.v[#td.v+1] = func:ma_he(enemy_ref[ene_index],tipo[index])
   end
   
-  for p,k in ipairs(tipo) do
-    if tipo[p].ttype == "item" or tipo[p].comp == "dead" then
+  for p,k in ipairs(item) do
+    if item[p].ttype == "item" or item[p].comp == "dead" then
       table_feed(tab,p)
     end
   end
@@ -89,12 +89,6 @@ local function get_grid_position(e,d)
   
   return {ey = ey, ex = ex, py = py, px = px, dy = dy, dx = dx, iy = iy, ix = ix} -- enemy, player, dead, item
 end
-
--- ///////////////////////////////////////////////////
---// CHECK BRESHENLINE POSITION
---///////////////////////////////////////////////////
-
-
 
 -- ///////////////////////////////////////////////////
 --// VIEW UPDATE
